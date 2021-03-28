@@ -18,8 +18,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	return TRUE;
 }
 
-ImGuiApp dxApp;
-
 DWORD WINAPI DllThread(void* lpParam)
 {
     // Create our window
@@ -114,7 +112,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void MainGUI()
 {
-    if (ImGui::Begin("Class Dumper 2.0")) {
+    ImGuiWindowFlags flags;
+    flags = ImGuiWindowFlags_NoMove;
+    if (ImGui::Begin("Class Dumper 2.0", 0, flags)) {
         ImGui::Text("Target Module:");
         ImGui::SameLine();
         if (ImGui::BeginCombo("##combo", currentItem))
@@ -150,6 +150,7 @@ void MainGUI()
                     {
                         auto cm = new ClassMeta(vtable);
                         classes.push_back(cm);
+                        //Todo - Implement Multiple Inheritance Naming for interfaces
                     }
                 }
             }
@@ -182,18 +183,46 @@ void MainGUI()
             FreeLibraryAndExitThread(hModule, 0);
         }
         ImGui::PopStyleColor();
-        if (ImGui::Begin("ClassView")) {
-            if (bSectionInfoGood && bFoundVtables) {
+
+        if (ImGui::InputText(": Search classes", searchBuffer, 256)) {
+            searchClasses.clear();
+            bIsSearchActive = true;
+            std::string searchString = searchBuffer;
+            if (searchBuffer) {
                 for (auto cm : classes) {
-                    ImGui::Text("%s", cm->className.c_str());
-                    if (ImGui::IsItemClicked())
+                    if (cm->className.find(searchString) != std::string::npos)
                     {
-                        currentClass = cm;
+                        searchClasses.push_back(cm);
                     }
                 }
             }
+        }
+
+        // ClassViewer
+        if (ImGui::Begin("ClassView", 0, flags)) {
+            if (bSectionInfoGood && bFoundVtables) {
+                if (bIsSearchActive) {
+                    for (auto cm : searchClasses) {
+                        ImGui::Text("%s", cm->className.c_str());
+                        if (ImGui::IsItemClicked())
+                        {
+                            currentClass = cm;
+                        }
+                    }
+                }
+                else {
+                    for (auto cm : classes) {
+                        ImGui::Text("%s", cm->className.c_str());
+                        if (ImGui::IsItemClicked())
+                        {
+                            currentClass = cm;
+                        }
+                    }
+                }
+
+            }
             ImGui::SetWindowPos(ImVec2{ 0,101 });
-            ImGui::SetWindowSize(ImVec2{ 900,900 });
+            ImGui::SetWindowSize(ImVec2{ 900,950 });
             ImGui::End();
         }
         ImGui::SetWindowPos(ImVec2{ 0,0 });
@@ -217,16 +246,32 @@ void ClassInspector()
                 sprintf_s(buffer, "%p - %s", currentClass->VTable, currentClass->className.c_str());
                 ImGui::SetClipboardText(buffer);
             }
+            int tabIndex = 0;
+            unsigned int lastOffset = -1;
             if (currentClass->numBaseClasses >= 2) {
-                for (unsigned int i = 0; i < currentClass->numBaseClasses - 1; i++) {
-                    ImGui::Text("%s", currentClass->baseClassNames[i].c_str());
+                for (unsigned int i = 0; i < currentClass->baseClassNames.size(); i++) {
+                    if (lastOffset == currentClass->GetBaseClass(i + 1)->where.mdisp) {
+                        tabIndex += 1;
+                    }
+                    else {
+                        lastOffset = currentClass->GetBaseClass(i + 1)->where.mdisp;
+                        tabIndex = 0;
+                    }
+                    std::string formatString;
+                    for (unsigned int i = 0; i < tabIndex; i++) { formatString.append("\t"); }
+                    formatString.append("%s");
+                    ImGui::Text(formatString.c_str(), currentClass->baseClassNames[i].c_str());
                 }
             }
         }
         ImGui::SetWindowPos(ImVec2{ 900,0 });
-        ImGui::SetWindowSize(ImVec2{ 300,900 });
+        ImGui::SetWindowSize(ImVec2{ 600,900 });
         ImGui::End();
     }
+}
+
+void ExportData()
+{
 }
 
 void RenderSceneDX12()
@@ -262,7 +307,7 @@ void RenderSceneDX12()
     dxApp.m_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&dxApp.m_pd3dCommandList);
 
     dxApp.m_pSwapChain->Present(1, 0); // Present with vsync
-    //guiApp.m_pSwapChain->Present(0, 0); // Present without vsync
+    //dxApp.m_pSwapChain->Present(0, 0); // Present without vsync
 
     UINT64 fenceValue = dxApp.m_fenceLastSignaledValue + 1;
     dxApp.m_pd3dCommandQueue->Signal(dxApp.m_fence, fenceValue);

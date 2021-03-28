@@ -233,6 +233,8 @@ void MainGUI()
 
 void ClassInspector()
 {
+    static std::vector<uintptr_t> instances;
+
     if (ImGui::Begin("Class Info's"))
     {
         if (!currentClass) {
@@ -246,7 +248,7 @@ void ClassInspector()
                 sprintf_s(buffer, "%p - %s", currentClass->VTable, currentClass->className.c_str());
                 ImGui::SetClipboardText(buffer);
             }
-            int tabIndex = 0;
+            unsigned int tabIndex = 0;
             unsigned int lastOffset = -1;
             if (currentClass->numBaseClasses >= 2) {
                 for (unsigned int i = 0; i < currentClass->baseClassNames.size(); i++) {
@@ -261,6 +263,25 @@ void ClassInspector()
                     for (unsigned int i = 0; i < tabIndex; i++) { formatString.append("\t"); }
                     formatString.append("%s");
                     ImGui::Text(formatString.c_str(), currentClass->baseClassNames[i].c_str());
+                }
+            }
+        }
+        if (ImGui::Button("Find Instances") && currentClass) {
+            instances.clear();
+            instances = FindAllInstances((uintptr_t)currentClass->VTable);
+        }
+        if (instances.size() != 0) {
+            ImGui::Text("found %d instances", instances.size());
+            for (unsigned int i = 0; i < instances.size(); i++) {
+                ImGui::Text("%x", instances[i]);
+                if (ImGui::IsItemClicked()) {
+                    char buffer[256] = { 0 };
+#ifdef _WIN64
+                    sprintf_s(buffer, "%llx", instances[i]);
+#else
+                    sprintf_s(buffer, "%x", instances[i]);
+#endif
+                    ImGui::SetClipboardText(buffer);
                 }
             }
         }

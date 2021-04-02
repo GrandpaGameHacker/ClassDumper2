@@ -7,13 +7,15 @@
 #include "helpers/StringConversions.h"
 
 #ifdef _WIN64
-constexpr char POINTER_CLASSFMTSTR[] = "%llX - %s";
+constexpr char POINTER_CLASSFMTSTR[] = "%s - VTable at %llX";
+constexpr char POINTER_METAFMTSTR[] = "CompleteObjectLocator: %llX";
 constexpr char POINTER_FMTSTRING[] = "%llX";
 constexpr char VTABLE_FMTSTRING[] = "%d - %llX - %s";
 #else
-constexpr char POINTER_CLASSFMTSTR[] = "%X - %s";
+constexpr char POINTER_CLASSFMTSTR[] = "%s - VTable at %X";
+constexpr char POINTER_METAFMTSTR[] = "CompleteObjectLocator: %X";
 constexpr char POINTER_FMTSTRING[] = "%X";
-constexpr char VTABLE_FMTSTRING[] = "%d - %X  - %s"
+constexpr char VTABLE_FMTSTRING[] = "%d - %X  - %s";
 #endif
 
 DWORD WINAPI DllThread(void* lpParam);
@@ -26,6 +28,7 @@ static HMODULE hModule;
 static HWND DxWindow;
 static WNDCLASSEX wc;
 static ImGuiApp dxApp;
+static SectionInfo* targetSectionInfo;
 
 static bool bSectionInfoGood = false;
 static bool bFoundVtables = false;

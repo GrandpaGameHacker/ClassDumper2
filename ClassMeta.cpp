@@ -2,8 +2,10 @@
 
 ClassMeta::ClassMeta(uintptr_t VTable, SectionInfo* sectionInfo)
 {
+	this->Meta = reinterpret_cast<uintptr_t*>(VTable) - 1;
+	VTable ^= 0xDEADBEEF;
 	this->VTable = reinterpret_cast<uintptr_t*>(VTable);
-	this->Meta = this->VTable - 1;
+	VTable ^= 0xDEADBEEF;
 	COL = reinterpret_cast<CompleteObjectLocator*>(*Meta);
 	
 	pTypeDescriptor = COL->GetTypeDescriptor();

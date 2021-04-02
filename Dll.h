@@ -7,12 +7,12 @@
 #include "helpers/StringConversions.h"
 
 #ifdef _WIN64
-constexpr char POINTER_CLASSFMTSTR[] = "%s - VTable at %llX";
+constexpr char POINTER_CLASSFMTSTR[] = "%s - VTable at %s";
 constexpr char POINTER_METAFMTSTR[] = "CompleteObjectLocator: %llX";
 constexpr char POINTER_FMTSTRING[] = "%llX";
 constexpr char VTABLE_FMTSTRING[] = "%d - %llX - %s";
 #else
-constexpr char POINTER_CLASSFMTSTR[] = "%s - VTable at %X";
+constexpr char POINTER_CLASSFMTSTR[] = "%s - VTable at %s";
 constexpr char POINTER_METAFMTSTR[] = "CompleteObjectLocator: %X";
 constexpr char POINTER_FMTSTRING[] = "%X";
 constexpr char VTABLE_FMTSTRING[] = "%d - %X  - %s";

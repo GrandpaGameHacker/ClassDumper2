@@ -1,5 +1,6 @@
 #include "Dll.h"
-
+// Note: Memory Scanner works PERFECT without optimizations??? but self scans with it enabled.
+// will find a fix later
 BOOL APIENTRY DllMain(HMODULE hModule,
 	DWORD ul_reason_for_call,
 	LPVOID lpReserved
@@ -165,6 +166,13 @@ void MainGUI()
                 bSectionInfoGood = false;
                 bFoundVtables = false;
             }
+            for (unsigned int i = 0; i < VtableList.size(); i++) {
+                VtableList[i] = NULL;
+            }
+            VtableList.resize(0);
+            VtableList.shrink_to_fit();
+
+
         }
         ImGui::PopStyleColor();
 
@@ -278,11 +286,12 @@ void ClassInspector()
             ImGui::Text("Class not selected yet.");
         else
         {
-            ImGui::Text(POINTER_CLASSFMTSTR, currentClass->className.c_str(), (uintptr_t)currentClass->VTable ^ 0xDEADBEEF);
+            std::string VTableString = IntegerToHexStr((uintptr_t)currentClass->VTable ^ 0xDEADBEEF);
+            ImGui::Text(POINTER_CLASSFMTSTR, currentClass->className.c_str(), VTableString.c_str());
             if (ImGui::IsItemClicked())
             {
                 char buffer[256] = { 0 };
-                sprintf_s(buffer, POINTER_CLASSFMTSTR, currentClass->className.c_str(), (uintptr_t)currentClass->VTable ^ 0xDEADBEEF);
+                sprintf_s(buffer, POINTER_CLASSFMTSTR, currentClass->className.c_str(), VTableString.c_str());
 
                 ImGui::SetClipboardText(buffer);
             }
@@ -366,7 +375,6 @@ void InstanceTool()
     if (ImGui::Begin("Instance Tool", 0, flags)) {
         if (ImGui::Button("Find Instances") && currentClass) {
             instances.clear();
-            // this deadbeef key stops us from self scanning
             instances = FindAllInstances((uintptr_t)currentClass->VTable, targetSectionInfo);
         }
         if (instances.size() != 0) {
@@ -385,6 +393,15 @@ void InstanceTool()
                             }
                             badVtable = true;
                         }
+                    }
+                    else {
+                        ImGui::TextColored({ 255,0,0,1 }, POINTER_FMTSTRING, instances[i]);
+                        if (ImGui::IsItemClicked()) {
+                            char buffer[256] = { 0 };
+                            sprintf_s(buffer, POINTER_FMTSTRING, instances[i]);
+                            ImGui::SetClipboardText(buffer);
+                        }
+                        badVtable = true;
                     }
                 }
                 if (!badVtable) {

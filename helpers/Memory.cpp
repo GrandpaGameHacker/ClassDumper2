@@ -44,7 +44,6 @@ std::vector<uintptr_t> FindAllInstances(uintptr_t VTable, SectionInfo* sectionIn
 		if (mbi.State != MEM_COMMIT || mbi.Protect & BadPageMask) continue;
 		if (mbi.Protect == PAGE_READONLY) continue;
 		uintptr_t address = (uintptr_t)mbi.BaseAddress;
-		if (sectionInfo->RDATA.base <= address && address <= sectionInfo->TEXT.end) continue;
 		auto p_mbi = new MEMORY_BASIC_INFORMATION();
 		memcpy(p_mbi, &mbi, sizeof(mbi));
 		mbiList.push_back(p_mbi);

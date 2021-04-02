@@ -19,3 +19,9 @@ std::wstring Utf8Decode(const std::string& str)
 	MultiByteToWideChar(CP_UTF8, 0, &str[0], static_cast<int>(str.size()), &wstringTo[0], sizeNeeded);
 	return wstringTo;
 }
+
+void StrLower(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(),
+		[](unsigned char c) { return std::tolower(c); });
+}

@@ -39,6 +39,7 @@ std::vector<uintptr_t> FindAllInstances(uintptr_t VTable)
 		SIZE_T query = VirtualQuery((void*)current, &mbi, sizeof(mbi));
 		if (!query) break;
 		if (mbi.State != MEM_COMMIT || mbi.Protect & BadPageMask) continue;
+		if (mbi.Protect == PAGE_READONLY) continue;
 		auto p_mbi = new MEMORY_BASIC_INFORMATION();
 		memcpy(p_mbi, &mbi, sizeof(mbi));
 		mbiList.push_back(p_mbi);

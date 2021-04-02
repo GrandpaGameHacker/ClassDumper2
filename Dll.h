@@ -4,12 +4,24 @@
 #include "ClassMeta.h"
 #include "helpers/VTables.h"
 #include "helpers/ModuleUtils.h"
+#include "helpers/StringConversions.h"
+
+#ifdef _WIN64
+constexpr char POINTER_CLASSFMTSTR[] = "%llX - %s";
+constexpr char POINTER_FMTSTRING[] = "%llX";
+constexpr char VTABLE_FMTSTRING[] = "%d - %llX - %s";
+#else
+constexpr char POINTER_CLASSFMTSTR[] = "%X - %s";
+constexpr char POINTER_FMTSTRING[] = "%X";
+constexpr char VTABLE_FMTSTRING[] = "%d - %X  - %s"
+#endif
 
 DWORD WINAPI DllThread(void* lpParam);
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+static ImGuiWindowFlags flags;
 static HMODULE hModule;
 static HWND DxWindow;
 static WNDCLASSEX wc;
@@ -30,8 +42,11 @@ static char searchBuffer[256];
 static bool bIsSearchActive;
 static std::vector<ClassMeta*> searchClasses;
 
+static std::vector<uintptr_t> instances;
 
 void MainGUI();
+void ClassViewer();
 void ClassInspector();
+void InstanceTool();
 void ExportData();
 void RenderSceneDX12();

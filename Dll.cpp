@@ -46,9 +46,9 @@ DWORD WINAPI DllThread(void* lpParam)
     ImGui::StyleColorsDark();
     dxApp.SetupBackend();
 
-    // Setup Program state variables
     modules = GetModuleList(hModule);
     bool done = false;
+    flags = ImGuiWindowFlags_NoMove;
     while (!done)
     {
         MSG msg;
@@ -65,7 +65,9 @@ DWORD WINAPI DllThread(void* lpParam)
         {
             // Render imgui windows and define logic
             MainGUI();
+            ClassViewer();
             ClassInspector();
+            InstanceTool();
         }
         RenderSceneDX12();
     }
@@ -112,8 +114,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void MainGUI()
 {
-    ImGuiWindowFlags flags;
-    flags = ImGuiWindowFlags_NoMove;
     if (ImGui::Begin("Class Dumper 2.0", 0, flags)) {
         ImGui::Text("Target Module:");
         ImGui::SameLine();
@@ -146,11 +146,18 @@ void MainGUI()
                 if (VtableList.size() != 0) {
                     bFoundVtables = true;
                     SortSymbols(VtableList);
+                    std::string lastClassName = "";
                     for (uintptr_t vtable : VtableList)
                     {
-                        auto cm = new ClassMeta(vtable);
+                        auto cm = new ClassMeta(vtable, si);
+                        if (lastClassName == cm->className)
+                        {
+                            if (cm->bMultipleInheritance) cm->bInterface = true;
+                        }
+                        else {
+                            lastClassName = cm->className;
+                        }
                         classes.push_back(cm);
-                        //Todo - Implement Multiple Inheritance Naming for interfaces
                     }
                 }
             }
@@ -190,7 +197,10 @@ void MainGUI()
             std::string searchString = searchBuffer;
             if (searchBuffer) {
                 for (auto cm : classes) {
-                    if (cm->className.find(searchString) != std::string::npos)
+                    std::string className = cm->className;
+                    StrLower(className);
+                    StrLower(searchString);
+                    if (className.find(searchString) != std::string::npos)
                     {
                         searchClasses.push_back(cm);
                     }
@@ -198,56 +208,91 @@ void MainGUI()
             }
         }
 
-        // ClassViewer
-        if (ImGui::Begin("ClassView", 0, flags)) {
-            if (bSectionInfoGood && bFoundVtables) {
-                if (bIsSearchActive) {
-                    for (auto cm : searchClasses) {
-                        ImGui::Text("%s", cm->className.c_str());
-                        if (ImGui::IsItemClicked())
-                        {
-                            currentClass = cm;
-                        }
-                    }
-                }
-                else {
-                    for (auto cm : classes) {
-                        ImGui::Text("%s", cm->className.c_str());
-                        if (ImGui::IsItemClicked())
-                        {
-                            currentClass = cm;
-                        }
-                    }
-                }
-
-            }
-            ImGui::SetWindowPos(ImVec2{ 0,101 });
-            ImGui::SetWindowSize(ImVec2{ 900,950 });
-            ImGui::End();
-        }
         ImGui::SetWindowPos(ImVec2{ 0,0 });
         ImGui::SetWindowSize(ImVec2{900,100});
         ImGui::End();
     }
 }
 
+void ClassViewer() {
+    if (ImGui::Begin("ClassView", 0, flags)) {
+        if (bSectionInfoGood && bFoundVtables) {
+            if (bIsSearchActive) {
+                for (auto cm : searchClasses) {
+                    std::string fmt = "";
+                    if (cm->bInterface)
+                    {
+                        fmt += "interface %s -> %s";
+                    }
+                    else if (cm->bStruct)
+                        fmt += "struct %s";
+                    else
+                        fmt += "class %s";
+                    if (cm->bInterface)
+                        ImGui::Text(fmt.c_str(), cm->className.c_str(), cm->interfaceName.c_str());
+                    else
+                        ImGui::Text(fmt.c_str(), cm->className.c_str());
+                    if (ImGui::IsItemClicked())
+                    {
+                        instances.clear();
+                        currentClass = cm;
+                    }
+                }
+            }
+            else
+            {
+                for (auto cm : classes) {
+                    std::string fmt = "";
+                    if (cm->bInterface)
+                    {
+                        fmt += "interface %s -> %s";
+                    }
+                    else if (cm->bStruct)
+                        fmt += "struct %s";
+                    else
+                        fmt += "class %s";
+                    if (cm->bInterface)
+                        ImGui::Text(fmt.c_str(), cm->className.c_str(), cm->interfaceName.c_str());
+                    else
+                        ImGui::Text(fmt.c_str(), cm->className.c_str());
+                    if (ImGui::IsItemClicked())
+                    {
+                        instances.clear();
+                        currentClass = cm;
+                    }
+                }
+            }
+
+        }
+        ImGui::SetWindowPos(ImVec2{ 0,101 });
+        ImGui::SetWindowSize(ImVec2{ 900,950 });
+        ImGui::End();
+    }
+}
+
 void ClassInspector()
 {
-    static std::vector<uintptr_t> instances;
-
-    if (ImGui::Begin("Class Info's"))
+    if (ImGui::Begin("Class Info"))
     {
         if (!currentClass) {
             ImGui::Text("Class not selected yet.");
         }
         else
         {
-            ImGui::Text("%x - %s", currentClass->VTable, currentClass->className.c_str());
+
+            ImGui::Text(POINTER_CLASSFMTSTR, (uintptr_t)currentClass->VTable, currentClass->className.c_str());
+
             if (ImGui::IsItemClicked()) {
                 char buffer[1024] = { 0 };
-                sprintf_s(buffer, "%p - %s", currentClass->VTable, currentClass->className.c_str());
+                sprintf_s(buffer, POINTER_CLASSFMTSTR, (uintptr_t)currentClass->VTable, currentClass->className.c_str());
+                
                 ImGui::SetClipboardText(buffer);
             }
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::TextColored({255,0,0,1}, "Inheritance Tree");
+            ImGui::Separator();
             unsigned int tabIndex = 0;
             unsigned int lastOffset = -1;
             if (currentClass->numBaseClasses >= 2) {
@@ -265,7 +310,49 @@ void ClassInspector()
                     ImGui::Text(formatString.c_str(), currentClass->baseClassNames[i].c_str());
                 }
             }
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::TextColored({0,120,250,1}, "Information");
+            ImGui::Separator();
+            if (!currentClass->bInterface) {
+                if (currentClass->bVirtualInheritance)
+                    ImGui::Text("Has Virtual Inheritance");
+                if (currentClass->bMultipleInheritance)
+                    ImGui::Text("Has Multiple Inheritance");
+                if (currentClass->bAmbigious)
+                    ImGui::Text("Has Ambigious Inheritance");
+            }
+            else {
+                ImGui::Text("This is an interface implementation");
+                ImGui::Text("Implementing: %s", currentClass->interfaceName.c_str());
+            }
+            ImGui::Text("Number of virtual functions: %d", currentClass->VirtualFunctions.size());
+        
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::TextColored({ 250,100,0,1 }, "Virtual Functions:");
+            ImGui::Separator();
+            {
+                unsigned int index = 0;
+                for (auto virtualFunction : currentClass->VirtualFunctions) {
+                    ImGui::TextColored({ 250,0,130,1 }, VTABLE_FMTSTRING, index, virtualFunction, currentClass->VirtualFunctionNames[index].c_str());
+                    index++;
+                }
+            }
         }
+
+
+        ImGui::SetWindowPos(ImVec2{ 900,0 });
+        ImGui::SetWindowSize(ImVec2{ 600,1050 });
+        ImGui::End();
+    }
+}
+
+void InstanceTool()
+{
+    if (ImGui::Begin("Instance Tool", 0, flags)) {
         if (ImGui::Button("Find Instances") && currentClass) {
             instances.clear();
             instances = FindAllInstances((uintptr_t)currentClass->VTable);
@@ -273,26 +360,26 @@ void ClassInspector()
         if (instances.size() != 0) {
             ImGui::Text("found %d instances", instances.size());
             for (unsigned int i = 0; i < instances.size(); i++) {
-                ImGui::Text("%x", instances[i]);
+                ImGui::Text(POINTER_FMTSTRING, instances[i]);
                 if (ImGui::IsItemClicked()) {
                     char buffer[256] = { 0 };
-#ifdef _WIN64
-                    sprintf_s(buffer, "%llx", instances[i]);
-#else
-                    sprintf_s(buffer, "%x", instances[i]);
-#endif
+                    sprintf_s(buffer, POINTER_FMTSTRING, instances[i]);
                     ImGui::SetClipboardText(buffer);
                 }
             }
         }
-        ImGui::SetWindowPos(ImVec2{ 900,0 });
-        ImGui::SetWindowSize(ImVec2{ 600,900 });
+        ImGui::SetWindowPos(ImVec2{ 1500,0 });
+        ImGui::SetWindowSize(ImVec2{ 600,1050 });
         ImGui::End();
     }
+    
 }
 
 void ExportData()
 {
+    /*To Be Implemented!
+    Idea: Will Have export settings, XML, json or plain text dump or other?*/
+    /*Just so that people can parse it any way they like*/
 }
 
 void RenderSceneDX12()

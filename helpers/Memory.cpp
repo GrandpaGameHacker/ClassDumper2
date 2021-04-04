@@ -18,6 +18,7 @@ bool IsBadReadPointer(void* p)
 	return true;
 }
 // multithreaded memory scanner slightly modified to reduce self references
+
 std::vector<uintptr_t> FindAllInstances(uintptr_t VTable, SectionInfo* sectionInfo)
 {
 	const unsigned int threads = 12;
@@ -42,7 +43,7 @@ std::vector<uintptr_t> FindAllInstances(uintptr_t VTable, SectionInfo* sectionIn
 		SIZE_T query = VirtualQuery((void*)current, &mbi, sizeof(mbi));
 		if (!query) break;
 		if (mbi.State != MEM_COMMIT || mbi.Protect & BadPageMask) continue;
-		if (mbi.Protect == PAGE_READONLY) continue;
+		if (mbi.Protect == PAGE_READONLY || mbi.Protect == PAGE_EXECUTE_READ) continue;
 		uintptr_t address = (uintptr_t)mbi.BaseAddress;
 		auto p_mbi = new MEMORY_BASIC_INFORMATION();
 		memcpy(p_mbi, &mbi, sizeof(mbi));

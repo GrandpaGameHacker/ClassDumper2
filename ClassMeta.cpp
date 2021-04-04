@@ -5,7 +5,6 @@ ClassMeta::ClassMeta(uintptr_t VTable, SectionInfo* sectionInfo)
 	this->Meta = reinterpret_cast<uintptr_t*>(VTable) - 1;
 	VTable ^= 0xDEADBEEF;
 	this->VTable = reinterpret_cast<uintptr_t*>(VTable);
-	VTable ^= 0xDEADBEEF;
 	COL = reinterpret_cast<CompleteObjectLocator*>(*Meta);
 	
 	pTypeDescriptor = COL->GetTypeDescriptor();
@@ -23,7 +22,7 @@ ClassMeta::ClassMeta(uintptr_t VTable, SectionInfo* sectionInfo)
 	if (*(&pTypeDescriptor->name + 3) == 'U') {
 		bStruct = true;
 	}
-	VirtualFunctions = GetListOfFunctions((void*) VTable, sectionInfo);
+	VirtualFunctions = GetListOfFunctions((void*)this->VTable, sectionInfo);
 	for (auto virtualFunction : VirtualFunctions) {
 		BYTE* vf = reinterpret_cast<BYTE*>(virtualFunction);
 		std::string vfName = "";

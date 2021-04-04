@@ -35,7 +35,8 @@ bool IsValid(void* VTable_start, SectionInfo* sectionInfo)
 std::vector<uintptr_t> GetListOfFunctions(void* VTable_start, SectionInfo * sectionInfo)
 {
 	std::vector<uintptr_t> functionList;
-	auto* vtable = static_cast<uintptr_t*>(VTable_start);
+	uintptr_t vtable_decrypted = reinterpret_cast<uintptr_t>(VTable_start) ^ 0xDEADBEEF;
+	auto* vtable = reinterpret_cast<uintptr_t*>(vtable_decrypted);
 	auto function_ptr = *vtable;
 	while (sectionInfo->TEXT.base <= function_ptr && function_ptr <= sectionInfo->TEXT.end)
 	{

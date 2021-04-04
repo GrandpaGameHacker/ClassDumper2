@@ -50,6 +50,7 @@ static std::vector<uintptr_t> instances;
 void MainGUI();
 void ClassViewer();
 void ClassInspector();
+bool RenameVFunction(std::string& functionName);
 void InstanceTool();
 void ExportData();
 void RenderSceneDX12();

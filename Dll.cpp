@@ -1,6 +1,5 @@
 #include "Dll.h"
-// Note: Memory Scanner works PERFECT without optimizations??? but self scans with it enabled.
-// will find a fix later
+
 BOOL APIENTRY DllMain(HMODULE hModule,
 	DWORD ul_reason_for_call,
 	LPVOID lpReserved
@@ -148,9 +147,9 @@ void MainGUI()
                     bFoundVtables = true;
                     SortSymbols(VtableList);
                     std::string lastClassName = "";
-                    for (uintptr_t vtable : VtableList)
+                    for (unsigned int i = 0; i < VtableList.size(); i++)
                     {
-                        auto cm = new ClassMeta(vtable, targetSectionInfo);
+                        auto cm = new ClassMeta(VtableList[i], targetSectionInfo);
                         if (lastClassName == cm->className)
                         {
                             if (cm->bMultipleInheritance) cm->bInterface = true;
@@ -278,6 +277,8 @@ void ClassViewer() {
     }
 }
 
+bool renamingState = false;
+unsigned int renamingIndex = 0;
 void ClassInspector()
 {
     if (ImGui::Begin("Class Info"))
@@ -342,7 +343,7 @@ void ClassInspector()
                 ImGui::Text("This is an interface implementation");
                 ImGui::Text("Implementing: %s", currentClass->interfaceName.c_str());
             }
-            ImGui::Text("Number of parent classes/structs: %d", currentClass->numBaseClasses -1);
+            ImGui::Text("Number of parents: %d", currentClass->numBaseClasses -1);
             ImGui::Text("Number of virtual functions: %d", currentClass->VirtualFunctions.size());
             ImGui::Spacing();
             ImGui::Spacing();
@@ -350,24 +351,58 @@ void ClassInspector()
             ImGui::TextColored({ 250,100,0,1 }, "Virtual Functions:");
             ImGui::Separator();
             {
-                unsigned int index = 0;
-                for (auto virtualFunction : currentClass->VirtualFunctions) {
-                    ImGui::TextColored({ 250,0,130,1 }, VTABLE_FMTSTRING, index, virtualFunction, currentClass->VirtualFunctionNames[index].c_str());
+                bool menuState = false;
+                auto vfs = currentClass->VirtualFunctions;
+                for (unsigned int i = 0; i < vfs.size(); i++) {
+                    ImGui::TextColored({ 250,0,130,1 }, VTABLE_FMTSTRING, i, vfs[i], currentClass->VirtualFunctionNames[i].c_str());
                     if (ImGui::IsItemClicked()) {
                         char buffer[256] = { 0 };
-                        sprintf_s(buffer, VTABLE_FMTSTRING, index, virtualFunction, currentClass->VirtualFunctionNames[index].c_str());
+                        sprintf_s(buffer, VTABLE_FMTSTRING, i, vfs[i], currentClass->VirtualFunctionNames[i].c_str());
                         ImGui::SetClipboardText(buffer);
                     }
-                    index++;
+                    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+                        renamingIndex = i;
+                    }
+                    if (!menuState) {
+                        if (ImGui::BeginPopupContextItem("FunctionContext"))
+                        {
+                            if(ImGui::MenuItem("Disassemble Function")){}
+                            if (ImGui::MenuItem("Rename Function")) {
+                                renamingState = true;
+                            }
+                            ImGui::EndPopup();
+                            menuState = true;
+                        }
+                    }
                 }
             }
         }
-
+        if (renamingState) {
+            renamingState = RenameVFunction(currentClass->VirtualFunctionNames[renamingIndex]);
+        }
 
         ImGui::SetWindowPos(ImVec2{ 900,0 });
         ImGui::SetWindowSize(ImVec2{ 600,1050 });
         ImGui::End();
     }
+}
+char renameBuffer[256] = { 0 };
+bool RenameVFunction(std::string& functionName)
+{
+    
+    ImGui::OpenPopup("Rename Function");
+    if (ImGui::BeginPopupModal("Rename Function", 0, ImGuiWindowFlags_AlwaysAutoResize)){
+        ImGui::InputText("", renameBuffer, 256);
+        if (ImGui::Button("Rename")) {
+            functionName = std::string(renameBuffer);
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return false;
+        }
+        ImGui::EndPopup();
+        return true;
+    }
+    return false;
 }
 
 void InstanceTool()

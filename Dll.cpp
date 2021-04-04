@@ -114,7 +114,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void MainGUI()
 {
-    if (ImGui::Begin("Class Dumper 2.0", 0, flags)) {
+    if (ImGui::Begin("Class Dumper 2.0", 0, flags))
+    {
         ImGui::Text("Target Module:");
         ImGui::SameLine();
         if (ImGui::BeginCombo("##combo", currentItem))
@@ -276,9 +277,10 @@ void ClassViewer() {
         ImGui::End();
     }
 }
-
+bool disassemblerState = false;
 bool renamingState = false;
-unsigned int renamingIndex = 0;
+char renameBuffer[256] = { 0 };
+unsigned int vfindex = 0;
 void ClassInspector()
 {
     if (ImGui::Begin("Class Info"))
@@ -345,13 +347,15 @@ void ClassInspector()
             }
             ImGui::Text("Number of parents: %d", currentClass->numBaseClasses -1);
             ImGui::Text("Number of virtual functions: %d", currentClass->VirtualFunctions.size());
+            ImGui::Text("Size Of Class: "); ImGui::SameLine();
+            ImGui::InputScalar("", ImGuiDataType_U64, &currentClass->size, nullptr, nullptr, "%08X", ImGuiInputTextFlags_CharsHexadecimal);
             ImGui::Spacing();
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::TextColored({ 250,100,0,1 }, "Virtual Functions:");
             ImGui::Separator();
             {
-                bool menuState = false;
+                bool vfmenuState = false;
                 auto vfs = currentClass->VirtualFunctions;
                 for (unsigned int i = 0; i < vfs.size(); i++) {
                     ImGui::TextColored({ 250,0,130,1 }, VTABLE_FMTSTRING, i, vfs[i], currentClass->VirtualFunctionNames[i].c_str());
@@ -361,24 +365,34 @@ void ClassInspector()
                         ImGui::SetClipboardText(buffer);
                     }
                     if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-                        renamingIndex = i;
+                        vfindex = i;
                     }
-                    if (!menuState) {
+                    if (!vfmenuState) {
                         if (ImGui::BeginPopupContextItem("FunctionContext"))
                         {
-                            if(ImGui::MenuItem("Disassemble Function")){}
+                            if(ImGui::MenuItem("Disassemble Function"))
+                            {
+                                uintptr_t func = currentClass->VirtualFunctions[vfindex];
+                                size_t funcSize = disasm.GetFunctionSize(func);
+                                DisassembledInstructions = disasm.DecodeToString((uint8_t*)func, funcSize);
+                                disassemblerState = true;
+                            }
                             if (ImGui::MenuItem("Rename Function")) {
+                                memcpy_s(renameBuffer, 256, currentClass->VirtualFunctionNames[vfindex].c_str(), 256);
                                 renamingState = true;
                             }
                             ImGui::EndPopup();
-                            menuState = true;
+                            vfmenuState = true;
                         }
                     }
                 }
             }
         }
         if (renamingState) {
-            renamingState = RenameVFunction(currentClass->VirtualFunctionNames[renamingIndex]);
+            renamingState = RenameVFunctionPopup(currentClass->VirtualFunctionNames[vfindex]);
+        }
+        if (disassemblerState) {
+            disassemblerState = DisassembleFunctionPopup();
         }
 
         ImGui::SetWindowPos(ImVec2{ 900,0 });
@@ -386,8 +400,9 @@ void ClassInspector()
         ImGui::End();
     }
 }
-char renameBuffer[256] = { 0 };
-bool RenameVFunction(std::string& functionName)
+
+
+bool RenameVFunctionPopup(std::string& functionName)
 {
     
     ImGui::OpenPopup("Rename Function");
@@ -395,6 +410,24 @@ bool RenameVFunction(std::string& functionName)
         ImGui::InputText("", renameBuffer, 256);
         if (ImGui::Button("Rename")) {
             functionName = std::string(renameBuffer);
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return false;
+        }
+        ImGui::EndPopup();
+        return true;
+    }
+    return false;
+}
+
+bool DisassembleFunctionPopup()
+{
+    ImGui::OpenPopup("Disassemble Function");
+    if (ImGui::BeginPopupModal("Disassemble Function")) {
+        for (auto instr : DisassembledInstructions) {
+            ImGui::Text(instr.c_str());
+        }
+        if (ImGui::Button("Done")) {
             ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
             return false;

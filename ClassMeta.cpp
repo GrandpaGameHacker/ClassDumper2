@@ -7,6 +7,8 @@ ClassMeta::ClassMeta(uintptr_t VTable, SectionInfo* sectionInfo)
 	this->VTable = reinterpret_cast<uintptr_t*>(VTable);
 	COL = reinterpret_cast<CompleteObjectLocator*>(*Meta);
 	
+	size = 0;
+
 	pTypeDescriptor = COL->GetTypeDescriptor();
 	pClassDescriptor = COL->GetClassDescriptor();
 	pClassArray = pClassDescriptor->GetBaseClassArray();

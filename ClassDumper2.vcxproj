@@ -24,6 +24,8 @@
     <ProjectGuid>{89e56245-d791-4066-8c5c-fec81c6ff2ad}</ProjectGuid>
     <RootNamespace>ClassDumper2</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
+  	<VcpkgTriplet Condition="'$(Platform)'=='Win32'">x86-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -72,6 +74,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -88,7 +91,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <ExceptionHandling>Async</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ClassMeta.cpp" />
+    <ClCompile Include="Disassembler.cpp" />
     <ClCompile Include="ImGuiApp.cpp" />
     <ClCompile Include="Dll.cpp" />
     <ClCompile Include="dx12\imgui_impl_dx12.cpp" />
@@ -157,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassMeta.h" />
+    <ClInclude Include="Disassembler.h" />
     <ClInclude Include="ImGuiApp.h" />
     <ClInclude Include="custom_config.h" />
     <ClInclude Include="Dll.h" />

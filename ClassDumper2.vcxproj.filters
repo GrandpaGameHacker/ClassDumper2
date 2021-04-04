@@ -43,6 +43,7 @@
       <Filter>DX12_Helpers</Filter>
     </ClCompile>
     <ClCompile Include="ClassMeta.cpp" />
+    <ClCompile Include="Disassembler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dll.h">
@@ -79,5 +80,6 @@
       <Filter>DX12_Helpers</Filter>
     </ClInclude>
     <ClInclude Include="ClassMeta.h" />
+    <ClInclude Include="Disassembler.h" />
   </ItemGroup>
 </Project>

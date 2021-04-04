@@ -16,6 +16,8 @@ struct ClassMeta
 	std::vector<std::string> VirtualFunctionNames;
 	uintptr_t* Meta;
 
+	size_t size;
+
 	CompleteObjectLocator* COL;
 	TypeDescriptor* pTypeDescriptor;
 	ClassHierarchyDescriptor* pClassDescriptor;

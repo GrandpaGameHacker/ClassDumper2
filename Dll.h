@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include "ImGuiApp.h"
+#include "Disassembler.h"
 #include "ClassMeta.h"
 #include "helpers/VTables.h"
 #include "helpers/ModuleUtils.h"
@@ -47,10 +48,14 @@ static std::vector<ClassMeta*> searchClasses;
 
 static std::vector<uintptr_t> instances;
 
+static Disassembler disasm = Disassembler();
+static std::vector<std::string> DisassembledInstructions;
+
 void MainGUI();
 void ClassViewer();
 void ClassInspector();
-bool RenameVFunction(std::string& functionName);
+bool RenameVFunctionPopup(std::string& functionName);
+bool DisassembleFunctionPopup();
 void InstanceTool();
 void ExportData();
 void RenderSceneDX12();

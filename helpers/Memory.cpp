@@ -17,8 +17,9 @@ bool IsBadReadPointer(void* p)
 	}
 	return true;
 }
-// multithreaded memory scanner slightly modified to reduce self references
 
+// multithreaded memory scanner
+// slightly modified to reduce self references due to being in the same memory space
 std::vector<uintptr_t> FindAllInstances(uintptr_t VTable, SectionInfo* sectionInfo)
 {
 	const unsigned int threads = 12;
@@ -59,19 +60,17 @@ std::vector<uintptr_t> FindAllInstances(uintptr_t VTable, SectionInfo* sectionIn
 		if (mbiIndex == mbiMax) notDone = false;
 		for (unsigned int i = 0; i < threads; i++) {
 			if (mbiIndex < mbiMax) {
-				MEMORY_BASIC_INFORMATION* mbi = mbiList[mbiIndex];
+				MEMORY_BASIC_INFORMATION* currentMbi = mbiList[mbiIndex];
 				mbiIndex++;
-				if (mbi) {
-					futures[i] = std::async(FindReferences, (intptr_t)mbi->BaseAddress, mbi->RegionSize, VTable);
+				if (currentMbi) {
+					futures[i] = std::async(FindReferences, (intptr_t)currentMbi->BaseAddress, currentMbi->RegionSize, VTable);
 				}
 			}
 		}
 		for (unsigned int i = 0; i < threads; i++) {
 			if (futures[i].valid()) {
 				auto temp = futures[i].get();
-				for (auto item : temp) {
-					instances.push_back(item);
-				}
+				instances.insert(instances.end(), temp.begin(), temp.end());
 			}
 		}
 	}

@@ -612,7 +612,7 @@ void    ImGui_ImplDX12_InvalidateDeviceObjects()
     SafeRelease(g_pPipelineState);
     SafeRelease(g_pFontTextureResource);
 
-    ImGuiIO& io = ImGui::GetIO();
+	const ImGuiIO& io = ImGui::GetIO();
     io.Fonts->TexID = NULL; // We copied g_pFontTextureView to io.Fonts->TexID so let's clear that as well.
 
     for (UINT i = 0; i < g_numFramesInFlight; i++)

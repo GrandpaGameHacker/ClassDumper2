@@ -354,7 +354,16 @@ void ClassInspector()
             ImGui::Text("Number of parents: %d", currentClass->numBaseClasses -1);
             ImGui::Text("Number of virtual functions: %d", currentClass->VirtualFunctions.size());
             ImGui::Text("Size Of Class: "); ImGui::SameLine();
-            ImGui::InputScalar("", ImGuiDataType_U64, &currentClass->size, nullptr, nullptr, "%08X", ImGuiInputTextFlags_CharsHexadecimal);
+            if (currentClass->size_locked) {
+                ImGui::TextDisabled("%08X", currentClass->size);
+            }
+            else {
+                ImGui::PushItemWidth(65.0f);
+                ImGui::InputScalar("", ImGuiDataType_U64, &currentClass->size, nullptr, nullptr, "%08X", ImGuiInputTextFlags_CharsHexadecimal);
+                ImGui::PopItemWidth();
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("Lock Size", &currentClass->size_locked);
             ImGui::Spacing();
             ImGui::Spacing();
             ImGui::Separator();
@@ -457,7 +466,7 @@ void InstanceTool()
             instances = FindAllInstances((uintptr_t)currentClass->VTable);
         }
         if (instances.size() != 0) {
-            ImGui::Text("found %d instances", instances.size());
+            ImGui::Text("found %d instances in memory", instances.size());
             for (unsigned int i = 0; i < instances.size(); i++) {
             bool badVtable = false;
                 if (currentClass) {
@@ -494,7 +503,7 @@ void InstanceTool()
             }
         }
         if (codeReferences.size() != 0) {
-            ImGui::Text("found %d code references", codeReferences.size());
+            ImGui::Text("found %d vtable references in code", codeReferences.size());
             for (unsigned int i = 0; i < codeReferences.size(); i++) {
                 ImGui::TextColored({ 0,255,225,1 }, POINTER_FMTSTRING, codeReferences[i]);
                 if (ImGui::IsItemClicked()) {

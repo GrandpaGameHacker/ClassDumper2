@@ -146,7 +146,7 @@ std::vector<uintptr_t> FindCodeReferences(uintptr_t startAddress, size_t length,
 		return resultsList;
 	}
 
-	for (uintptr_t i = newmem; i < newmem + length; i += sizeof(uintptr_t))
+	for (uintptr_t i = newmem; i < newmem + length; i += 1)
 	{
 		uintptr_t candidate = *(uintptr_t*) i;
 		if (candidate == (scanValue))

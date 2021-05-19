@@ -4,11 +4,11 @@
     <Filter Include="Dll">
       <UniqueIdentifier>{79b1b7a2-3cc2-4930-a151-60dd9483d816}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RTTI_Helpers">
-      <UniqueIdentifier>{c99a47c8-6ec6-4283-8841-1768fc878848}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX12_Helpers">
       <UniqueIdentifier>{5169197c-85d0-47cb-95d1-fd093c3bae95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{c99a47c8-6ec6-4283-8841-1768fc878848}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -16,22 +16,22 @@
       <Filter>Dll</Filter>
     </ClCompile>
     <ClCompile Include="helpers\Memory.cpp">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="helpers\ModuleUtils.cpp">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="helpers\RTTI.cpp">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="helpers\StringConversions.cpp">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="helpers\Symbols.cpp">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="helpers\VTables.cpp">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClCompile>
     <ClCompile Include="dx12\imgui_impl_dx12.cpp">
       <Filter>DX12_Helpers</Filter>
@@ -42,30 +42,34 @@
     <ClCompile Include="ImGuiApp.cpp">
       <Filter>DX12_Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="ClassMeta.cpp" />
-    <ClCompile Include="Disassembler.cpp" />
+    <ClCompile Include="ClassMeta.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Disassembler.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dll.h">
       <Filter>Dll</Filter>
     </ClInclude>
     <ClInclude Include="helpers\Memory.h">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="helpers\ModuleUtils.h">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="helpers\RTTI.h">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="helpers\StringConversions.h">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="helpers\Symbols.h">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="helpers\VTables.h">
-      <Filter>RTTI_Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="dx12\imgui_impl_dx12.h">
       <Filter>DX12_Helpers</Filter>
@@ -79,7 +83,11 @@
     <ClInclude Include="custom_config.h">
       <Filter>DX12_Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="ClassMeta.h" />
-    <ClInclude Include="Disassembler.h" />
+    <ClInclude Include="ClassMeta.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Disassembler.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

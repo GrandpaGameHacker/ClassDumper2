@@ -8,6 +8,7 @@ ClassMeta::ClassMeta(uintptr_t VTable, SectionInfo* sectionInfo)
 	COL = reinterpret_cast<CompleteObjectLocator*>(*Meta);
 	
 	size = 0;
+	size_locked = false;
 
 	pTypeDescriptor = COL->GetTypeDescriptor();
 	pClassDescriptor = COL->GetClassDescriptor();

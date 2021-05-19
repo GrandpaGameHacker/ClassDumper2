@@ -4,6 +4,26 @@
 #include "helpers/VTables.h"
 #include "helpers/StringConversions.h"
 
+enum class MemberType
+{
+	BOOLEAN,
+	BYTE,
+	WORD,
+	DWORD,
+	QWORD,
+	POINTER,
+	FLOAT,
+	DOUBLE,
+	STRING
+};
+
+struct MemberVariable
+{
+	uintptr_t baseAddress;
+	uintptr_t offset;
+	MemberType type;
+};
+
 struct ClassMeta
 {
 	//Functions
@@ -17,6 +37,8 @@ struct ClassMeta
 	uintptr_t* Meta;
 
 	size_t size;
+	bool size_locked;
+	std::vector<MemberVariable*> members;
 
 	CompleteObjectLocator* COL;
 	TypeDescriptor* pTypeDescriptor;

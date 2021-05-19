@@ -32,6 +32,7 @@ std::vector<std::string> Disassembler::DecodeToString(uint8_t* instructionPointe
 {
     uint8_t* ip = instructionPointer;
     std::vector<std::string> instructions;
+    std::string s_instruction = "";
     uintptr_t offset = 0;
     ZydisDecodedInstruction instruction;
     while (ZYAN_SUCCESS(ZydisDecoderDecodeBuffer(&decoder, ip, length - offset, &instruction)))
@@ -39,7 +40,10 @@ std::vector<std::string> Disassembler::DecodeToString(uint8_t* instructionPointe
         char buffer[256];
         ZydisFormatterFormatInstruction(
             &formatter, &instruction, buffer, sizeof(buffer), (ZyanU64)ip);
-        instructions.push_back(buffer);
+        s_instruction += "0x" + IntegerToHexStr((uintptr_t)ip) + " | ";
+        s_instruction += buffer;
+        instructions.push_back(s_instruction);
+        s_instruction = "";
         ip += instruction.length;
         offset += instruction.length;
     }
@@ -74,6 +78,7 @@ size_t Disassembler::GetFunctionSize(uintptr_t functionAddress)
         offset += instruction.length;
         funcSize += instruction.length;
         if (instruction.mnemonic == ZYDIS_MNEMONIC_RET) break;
+        if (instruction.mnemonic == ZYDIS_MNEMONIC_INT3) break;
     }
     return funcSize;
 

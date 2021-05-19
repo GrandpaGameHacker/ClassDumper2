@@ -47,6 +47,7 @@ static bool bIsSearchActive;
 static std::vector<ClassMeta*> searchClasses;
 
 static std::vector<uintptr_t> instances;
+static std::vector<uintptr_t> codeReferences;
 
 static Disassembler disasm = Disassembler();
 static std::vector<std::string> DisassembledInstructions;

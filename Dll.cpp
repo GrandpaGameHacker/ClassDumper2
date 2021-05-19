@@ -176,6 +176,11 @@ void MainGUI()
         }
         ImGui::PopStyleColor();
 
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(ImColor(0, 155, 125)));
+        ImGui::SameLine();
+        if (ImGui::Button("Import")) {}
+        ImGui::PopStyleColor();
+
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(ImColor(0, 155, 0)));
         ImGui::SameLine();
         if (ImGui::Button("Export")) {}
@@ -281,6 +286,7 @@ bool disassemblerState = false;
 bool renamingState = false;
 char renameBuffer[256] = { 0 };
 unsigned int vfindex = 0;
+
 void ClassInspector()
 {
     if (ImGui::Begin("Class Info"))
@@ -440,10 +446,15 @@ bool DisassembleFunctionPopup()
 
 void InstanceTool()
 {
-    if (ImGui::Begin("Instance Tool", 0, flags)) {
+    if (ImGui::Begin("Scanner Tool", 0, flags)) {
+        if (ImGui::Button("Find Code References")) {
+            codeReferences.clear();
+            codeReferences = FindCodeReferences(targetSectionInfo->TEXT.base, targetSectionInfo->TEXT.size, (uintptr_t)currentClass->VTable ^ 0xDEADBEEF);
+        }
+        ImGui::SameLine();
         if (ImGui::Button("Find Instances") && currentClass) {
             instances.clear();
-            instances = FindAllInstances((uintptr_t)currentClass->VTable, targetSectionInfo);
+            instances = FindAllInstances((uintptr_t)currentClass->VTable);
         }
         if (instances.size() != 0) {
             ImGui::Text("found %d instances", instances.size());
@@ -479,6 +490,17 @@ void InstanceTool()
                         sprintf_s(buffer, POINTER_FMTSTRING, instances[i]);
                         ImGui::SetClipboardText(buffer);
                     }
+                }
+            }
+        }
+        if (codeReferences.size() != 0) {
+            ImGui::Text("found %d code references", codeReferences.size());
+            for (unsigned int i = 0; i < codeReferences.size(); i++) {
+                ImGui::TextColored({ 0,255,225,1 }, POINTER_FMTSTRING, codeReferences[i]);
+                if (ImGui::IsItemClicked()) {
+                    char buffer[256] = { 0 };
+                    sprintf_s(buffer, POINTER_FMTSTRING, codeReferences[i]);
+                    ImGui::SetClipboardText(buffer);
                 }
             }
         }

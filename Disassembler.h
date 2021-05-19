@@ -2,7 +2,10 @@
 #include <Windows.h>
 #include <string>
 #include <vector>
-#include "Zydis\Zydis.h"
+#include "helpers/StringConversions.h"
+#include "Zydis/Zydis.h"
+#include "Zycore/Format.h"
+
 class Disassembler
 {
 	ZydisDecoder decoder;

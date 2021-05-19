@@ -20,8 +20,10 @@ bool IsBadReadPointer(void* p)
 
 // multithreaded memory scanner
 // slightly modified to reduce self references due to being in the same memory space
-std::vector<uintptr_t> FindAllInstances(uintptr_t VTable, SectionInfo* sectionInfo)
+std::vector<uintptr_t> FindAllInstances(uintptr_t VTable)
 {
+	//Customize to your liking how many threads
+	//keep in mind in release versions you'll get self references more often due to optimizations
 	const unsigned int threads = 12;
 	std::vector<uintptr_t> instances;
 
@@ -104,3 +106,56 @@ std::vector<uintptr_t> FindReferences(uintptr_t startAddress, size_t length, uin
 	free((void*)newmem);
 	return resultsList;
 }
+
+#ifdef _WIN64
+std::vector<uintptr_t> FindCodeReferences(uintptr_t startAddress, size_t length, uintptr_t scanValue)
+{
+	std::vector<uintptr_t> resultsList;
+	uintptr_t newmem = (uintptr_t)malloc(length);
+	if (!newmem) return resultsList;
+	SIZE_T bytesRead = 0;
+	if (!ReadProcessMemory((HANDLE)-1, (void*)startAddress, (void*)newmem, length, &bytesRead))
+	{
+		free((void*)newmem);
+		return resultsList;
+	}
+
+	for (uintptr_t i = newmem; i < newmem + length; i += 1)
+	{
+		uintptr_t realAddress = (i - newmem) + startAddress;
+		uintptr_t candidate = *(DWORD*)i;
+		candidate += realAddress + 4;
+		if (candidate == (scanValue))
+		{
+			resultsList.push_back(realAddress);
+		}
+	}
+	free((void*)newmem);
+	return resultsList;
+}
+#else
+std::vector<uintptr_t> FindCodeReferences(uintptr_t startAddress, size_t length, uintptr_t scanValue)
+{
+	std::vector<uintptr_t> resultsList;
+	uintptr_t newmem = (uintptr_t)malloc(length);
+	if (!newmem) return resultsList;
+	SIZE_T bytesRead = 0;
+	if (!ReadProcessMemory((HANDLE)-1, (void*)startAddress, (void*)newmem, length, &bytesRead))
+	{
+		free((void*)newmem);
+		return resultsList;
+	}
+
+	for (uintptr_t i = newmem; i < newmem + length; i += sizeof(uintptr_t))
+	{
+		uintptr_t candidate = *(uintptr_t*) i;
+		if (candidate == (scanValue))
+		{
+			uintptr_t realAddress = (i - newmem) + startAddress;
+			resultsList.push_back(realAddress);
+		}
+	}
+	free((void*)newmem);
+	return resultsList;
+}
+#endif

@@ -69,7 +69,7 @@ DWORD WINAPI DllThread(void* lpParam)
             ClassInspector();
             InstanceTool();
         }
-        RenderSceneDX12();
+        dxApp.RenderFrame();
     }
         dxApp.WaitForLastSubmittedFrame();
 
@@ -112,6 +112,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
+bool exportPopupState = false;
+bool importPopupState = false;
 void MainGUI()
 {
     if (ImGui::Begin("Class Dumper 2.0", 0, flags))
@@ -138,52 +140,22 @@ void MainGUI()
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(ImColor(155, 0, 0)));
         if (ImGui::Button("Dump!") && targetModule != nullptr)
         {
-            VtableList.clear();
-            classes.clear();
-            targetSectionInfo = GetSectionInformation(targetModule);
-            if (targetSectionInfo) {
-                bSectionInfoGood = true;
-                VtableList = FindAllVTables(targetSectionInfo);
-                if (VtableList.size() != 0) {
-                    bFoundVtables = true;
-                    SortSymbols(VtableList);
-                    std::string lastClassName = "";
-                    for (unsigned int i = 0; i < VtableList.size(); i++)
-                    {
-                        auto cm = new ClassMeta(VtableList[i], targetSectionInfo);
-                        if (lastClassName == cm->className)
-                        {
-                            if (cm->bMultipleInheritance) cm->bInterface = true;
-                        }
-                        else {
-                            lastClassName = cm->className;
-                        }
-                        classes.push_back(cm);
-                    }
-                }
-            }
-            else {
-                bSectionInfoGood = false;
-                bFoundVtables = false;
-            }
-            for (unsigned int i = 0; i < VtableList.size(); i++) {
-                VtableList[i] = NULL;
-            }
-            VtableList.resize(0);
-            VtableList.shrink_to_fit();
-
-
+            Dump();
         }
         ImGui::PopStyleColor();
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(ImColor(0, 155, 125)));
         ImGui::SameLine();
-        if (ImGui::Button("Import")) {}
+        if (ImGui::Button("Import")) {
+            importPopupState = true;
+        }
         ImGui::PopStyleColor();
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(ImColor(0, 155, 0)));
         ImGui::SameLine();
-        if (ImGui::Button("Export")) {}
+        if (ImGui::Button("Export")) {
+            exportPopupState = true;
+        }
         ImGui::PopStyleColor();
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(ImColor(0, 0, 155)));
@@ -219,6 +191,16 @@ void MainGUI()
                     }
                 }
             }
+            else {
+                bIsSearchActive = false;
+            }
+        }
+        if (exportPopupState) {
+            exportPopupState = PreExportPopup();
+        }
+
+        if (importPopupState) {
+            importPopupState = PreImportPopup();
         }
 
         ImGui::SetWindowPos(ImVec2{ 0,0 });
@@ -227,52 +209,69 @@ void MainGUI()
     }
 }
 
+void Dump()
+{
+    VtableList.clear();
+    classes.clear();
+    targetSectionInfo = GetSectionInformation(targetModule);
+    if (targetSectionInfo) {
+        bSectionInfoGood = true;
+        VtableList = FindAllVTables(targetSectionInfo);
+        if (VtableList.size() != 0) {
+            bFoundVtables = true;
+            SortSymbols(VtableList);
+            std::string lastClassName = "";
+            for (unsigned int i = 0; i < VtableList.size(); i++)
+            {
+                auto cm = new ClassMeta(VtableList[i], targetSectionInfo);
+                if (lastClassName == cm->className)
+                {
+                    if (cm->bMultipleInheritance) cm->bInterface = true;
+                }
+                else {
+                    lastClassName = cm->className;
+                }
+                classes.push_back(cm);
+            }
+        }
+    }
+    else {
+        bSectionInfoGood = false;
+        bFoundVtables = false;
+    }
+    for (unsigned int i = 0; i < VtableList.size(); i++) {
+        VtableList[i] = NULL;
+    }
+    VtableList.resize(0);
+    VtableList.shrink_to_fit();
+}
+
 void ClassViewer() {
+    auto localClasses = classes;
     if (ImGui::Begin("ClassView", 0, flags)) {
         if (bSectionInfoGood && bFoundVtables) {
             if (bIsSearchActive) {
-                for (auto cm : searchClasses) {
-                    std::string fmt = "";
-                    if (cm->bInterface)
-                    {
-                        fmt += "interface %s -> %s";
-                    }
-                    else if (cm->bStruct)
-                        fmt += "struct %s";
-                    else
-                        fmt += "class %s";
-                    if (cm->bInterface)
-                        ImGui::Text(fmt.c_str(), cm->className.c_str(), cm->interfaceName.c_str());
-                    else
-                        ImGui::Text(fmt.c_str(), cm->className.c_str());
-                    if (ImGui::IsItemClicked())
-                    {
-                        instances.clear();
-                        currentClass = cm;
-                    }
-                }
+                localClasses = searchClasses;
             }
-            else
-            {
-                for (auto cm : classes) {
-                    std::string fmt = "";
-                    if (cm->bInterface)
-                    {
-                        fmt += "interface %s -> %s";
-                    }
-                    else if (cm->bStruct)
-                        fmt += "struct %s";
-                    else
-                        fmt += "class %s";
-                    if (cm->bInterface)
-                        ImGui::Text(fmt.c_str(), cm->className.c_str(), cm->interfaceName.c_str());
-                    else
-                        ImGui::Text(fmt.c_str(), cm->className.c_str());
-                    if (ImGui::IsItemClicked())
-                    {
-                        instances.clear();
-                        currentClass = cm;
-                    }
+            for (auto cm : localClasses) {
+                std::string fmt = "";
+                if (cm->bInterface)
+                {
+                    fmt += "interface %s -> %s";
+                }
+                else if (cm->bStruct)
+                    fmt += "struct %s";
+                else
+                    fmt += "class %s";
+                if (cm->bInterface)
+                    ImGui::Text(fmt.c_str(), cm->className.c_str(), cm->interfaceName.c_str());
+                else
+                    ImGui::Text(fmt.c_str(), cm->className.c_str());
+                if (ImGui::IsItemClicked())
+                {
+                    instances.clear();
+                    codeReferences.clear();
+                    currentClass = cm;
                 }
             }
 
@@ -282,7 +281,9 @@ void ClassViewer() {
         ImGui::End();
     }
 }
+
 bool disassemblerState = false;
+bool structureDissectState = false;
 bool renamingState = false;
 char renameBuffer[256] = { 0 };
 unsigned int vfindex = 0;
@@ -364,6 +365,13 @@ void ClassInspector()
             }
             ImGui::SameLine();
             ImGui::Checkbox("Lock Size", &currentClass->size_locked);
+
+            if (ImGui::Button("Auto Dissect")) {
+                AutoStructureDissect();
+                structureDissectState = true;
+                
+            }
+
             ImGui::Spacing();
             ImGui::Spacing();
             ImGui::Separator();
@@ -409,6 +417,9 @@ void ClassInspector()
         if (disassemblerState) {
             disassemblerState = DisassembleFunctionPopup();
         }
+        if (structureDissectState) {
+            structureDissectState = StructureDissectWindow();
+        }
 
         ImGui::SetWindowPos(ImVec2{ 900,0 });
         ImGui::SetWindowSize(ImVec2{ 600,1050 });
@@ -439,14 +450,84 @@ bool DisassembleFunctionPopup()
 {
     ImGui::OpenPopup("Disassemble Function");
     if (ImGui::BeginPopupModal("Disassemble Function")) {
-        for (auto instr : DisassembledInstructions) {
-            ImGui::Text(instr.c_str());
+        if (ImGui::BeginChild("DisDisplay", {500,500})) {
+             for (auto instr : DisassembledInstructions) {
+                        ImGui::Text(instr.c_str());
+                    }
+             ImGui::EndChild();
         }
         if (ImGui::Button("Done")) {
             ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
             return false;
         }
+       
+
+        ImGui::EndPopup();
+        return true;
+    }
+    return false;
+}
+
+ExportType exportType = ExportType::TEXT;
+static int exportState = 0;
+bool PreExportPopup()
+{
+
+    if (classes.empty()) {
+        return false;
+    }
+    ImGui::OpenPopup("Export Results");
+    if (ImGui::BeginPopupModal("Export Results")) {
+        if (ImGui::RadioButton("Text format", &exportState, 0)) {
+            exportState = 0;
+            exportType = ExportType::TEXT;
+        }
+        if (ImGui::RadioButton("XML format", &exportState, 1)) {
+            exportState = 1;
+            exportType = ExportType::XML;
+        };
+        if (ImGui::Button("Save As...")) {
+            std::string sFile = SaveDialog(exportType, DxWindow);
+            if (!sFile.empty()) {
+                ExportClasses(sFile, classes, exportType);
+            }
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return false;
+        }
+
+
+        ImGui::EndPopup();
+        return true;
+    }
+    return false;
+}
+
+ImportType importType = ImportType::XML;
+static int importState = 0;
+
+bool PreImportPopup()
+{
+    if (classes.empty()) {
+        return false;
+    }
+    ImGui::OpenPopup("Import File");
+    if (ImGui::BeginPopupModal("Import File")) {
+        if (ImGui::RadioButton("XML format", &exportState, 1)) {
+            exportState = 1;
+            importType = ImportType::XML;
+        };
+        if (ImGui::Button("Open..")) {
+            std::string sFile = OpenDialog(importType, DxWindow);
+            if (!sFile.empty()) {
+                ImportClasses(sFile, importType, classes);
+            }
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return false;
+        }
+
         ImGui::EndPopup();
         return true;
     }
@@ -520,50 +601,129 @@ void InstanceTool()
     
 }
 
-void ExportData()
+
+// doesn't support multiple instances yet, if it will idk
+void AutoStructureDissect()
 {
-    /*To Be Implemented!
-    Idea: Will Have export settings, XML, json or plain text dump or other?*/
-    /*Just so that people can parse it any way they like*/
+    auto size = currentClass->size;
+    if (size == 0) return;
+    if (instances.size() == 0) return;
+
+    currentClass->members.clear();
+    unsigned int i = 0;
+    size_t offset = 0;
+    while (1)
+    {
+        if (offset >= size) break;
+
+        auto address = instances[i] + offset;
+        size_t member_size = 0;
+        MemberType type = AutoGuessType(address);
+
+        switch (type)
+        {
+        case MemberType::type_boolean :
+        case MemberType::type_byte:
+            member_size = sizeof(type_byte);
+            break;
+
+        case MemberType::type_signed_dword:
+        case MemberType::type_dword:
+        case MemberType::type_float:
+            member_size = sizeof(float);
+            break;
+
+        case MemberType::type_signed_qword:
+        case MemberType::type_qword:
+        case MemberType::type_double:
+            member_size = sizeof(double);
+            break;
+
+        case MemberType::type_pointer:
+            member_size = sizeof(uintptr_t);
+            break;
+
+        case MemberType::type_string:
+            member_size = strlen((const char*)address);
+            break;
+
+        default:
+            type = MemberType::type_byte;
+            member_size = 1;
+            break;
+        }
+
+        MemberVariable* member = new MemberVariable();
+        member->baseAddress = instances[i];
+        member->offset = offset;
+        member->type = type;
+        member->size = member_size;
+        //if (type == MemberType::type_pointer) {
+        //    auto ptr = member->baseAddress + member->offset;
+        //    ptr = *(uintptr_t*)ptr;
+        //    if (!IsBadReadPointer((void*)ptr))
+        //    {
+        //        if (IsValidSlow((void*)ptr, targetSectionInfo)) {
+        //            ClassMeta meta = ClassMeta(ptr, targetSectionInfo);
+        //            member->name = "vtable of" + meta.className;
+        //        }
+        //        else
+        //        {
+        //            auto ptr2 = *(uintptr_t*)ptr;
+        //            if (!IsBadReadPointerAligned((void*)ptr2)) {
+        //                if (IsValidSlow((void*)ptr2, targetSectionInfo)) {
+        //                    ClassMeta meta = ClassMeta(ptr, targetSectionInfo);
+        //                    member->name = "pointer to instance of" + meta.className;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    
+        //}
+        currentClass->members.push_back(member);
+        offset += member_size;
+    }
 }
 
-void RenderSceneDX12()
+bool StructureDissectWindow()
 {
-    // Rendering
-    ImGui::Render();
+    if (currentClass->members.size() == 0) return false;
 
-    FrameContext* frameCtx = dxApp.WaitForNextFrameResources();
-    UINT backBufferIdx = dxApp.m_pSwapChain->GetCurrentBackBufferIndex();
-    frameCtx->CommandAllocator->Reset();
+    if (ImGui::Begin("Structure Dissect")){
 
-    D3D12_RESOURCE_BARRIER barrier = {};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = dxApp.m_mainRenderTargetResource[backBufferIdx];
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    dxApp.m_pd3dCommandList->Reset(frameCtx->CommandAllocator, NULL);
-    dxApp.m_pd3dCommandList->ResourceBarrier(1, &barrier);
+        ImGui::SetWindowSize(ImVec2{ 600,1050 });
+        ImGui::Text(POINTER_FMTSTRING, currentClass->members[0]->baseAddress);
+        for (auto member : currentClass->members) {
+            ImGui::Text("%d | %s | %s", member->offset, member->name, MemberType_str[member->type]);
+        }
+        ImGui::End();
+    }
+    return true;
+}
 
-    // Render Dear ImGui graphics
-    const float backgroundColor[4] = { 0, 0, 0, 1.0 };
-    dxApp.m_pd3dCommandList->ClearRenderTargetView(dxApp.m_mainRenderTargetDescriptor[backBufferIdx], backgroundColor, 0, NULL);
-    dxApp.m_pd3dCommandList->OMSetRenderTargets(1, &dxApp.m_mainRenderTargetDescriptor[backBufferIdx], FALSE, NULL);
-    dxApp.m_pd3dCommandList->SetDescriptorHeaps(1, &dxApp.m_pd3dSrvDescHeap);
-    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxApp.m_pd3dCommandList);
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-    dxApp.m_pd3dCommandList->ResourceBarrier(1, &barrier);
-    dxApp.m_pd3dCommandList->Close();
+MemberType AutoGuessType(uintptr_t address)
+{
+    // read every type from address
+    float f = *(float*) address;
+    double db = *(double*) address;
+    unsigned long long qw = *(unsigned long long*) address;
+    uintptr_t ptr = *(uintptr_t*) address;
 
-    dxApp.m_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&dxApp.m_pd3dCommandList);
+    if (qw == 0)
+        return MemberType::type_dword;
 
-    dxApp.m_pSwapChain->Present(1, 0); // Present with vsync
-    //dxApp.m_pSwapChain->Present(0, 0); // Present without vsync
+    if (!IsBadReadPointer( (void*) ptr))
+        if(address % sizeof(uintptr_t) != 1)
+            return MemberType::type_pointer;
 
-    UINT64 fenceValue = dxApp.m_fenceLastSignaledValue + 1;
-    dxApp.m_pd3dCommandQueue->Signal(dxApp.m_fence, fenceValue);
-    dxApp.m_fenceLastSignaledValue = fenceValue;
-    frameCtx->FenceValue = fenceValue;
+    if (std::isnormal(f) && f > 0.0001 && f < 100000)
+        return MemberType::type_float;
+
+    if (std::isnormal(db) && db > 0.0001 && db < 100000)
+        return MemberType::type_double;
+
+    if (std::string((char*)address).size() > 5)
+        return MemberType::type_string;
+
+    return MemberType::type_dword;
 }

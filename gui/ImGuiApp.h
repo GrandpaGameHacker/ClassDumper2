@@ -46,5 +46,6 @@ public:
 	void CreateFrame();
 	void ResizeSwapChain(int width, int height);
 	void ShutdownBackend();
+	void RenderFrame();
 };
 

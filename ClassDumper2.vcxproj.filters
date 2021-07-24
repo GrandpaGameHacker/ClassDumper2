@@ -10,6 +10,9 @@
     <Filter Include="Helpers">
       <UniqueIdentifier>{c99a47c8-6ec6-4283-8841-1768fc878848}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GUI">
+      <UniqueIdentifier>{47461b43-71c0-4dac-a231-100cebac487f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dll.cpp">
@@ -33,19 +36,25 @@
     <ClCompile Include="helpers\VTables.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="dx12\imgui_impl_dx12.cpp">
+    <ClCompile Include="gui\ImGuiApp.cpp">
       <Filter>DX12_Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="dx12\imgui_impl_win32.cpp">
-      <Filter>DX12_Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuiApp.cpp">
-      <Filter>DX12_Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="ClassMeta.cpp">
+    <ClCompile Include="helpers\ClassMeta.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="Disassembler.cpp">
+    <ClCompile Include="helpers\Disassembler.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\dx12\imgui_impl_dx12.cpp">
+      <Filter>DX12_Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\dx12\imgui_impl_win32.cpp">
+      <Filter>DX12_Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\Exporter.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\Importer.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,22 +80,28 @@
     <ClInclude Include="helpers\VTables.h">
       <Filter>Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="dx12\imgui_impl_dx12.h">
+    <ClInclude Include="gui\custom_config.h">
       <Filter>DX12_Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="dx12\imgui_impl_win32.h">
+    <ClInclude Include="gui\ImGuiApp.h">
       <Filter>DX12_Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiApp.h">
-      <Filter>DX12_Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="custom_config.h">
-      <Filter>DX12_Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="ClassMeta.h">
+    <ClInclude Include="helpers\ClassMeta.h">
       <Filter>Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="Disassembler.h">
+    <ClInclude Include="helpers\Disassembler.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\dx12\imgui_impl_dx12.h">
+      <Filter>DX12_Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\dx12\imgui_impl_win32.h">
+      <Filter>DX12_Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\Exporter.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\Importer.h">
       <Filter>Helpers</Filter>
     </ClInclude>
   </ItemGroup>

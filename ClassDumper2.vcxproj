@@ -85,6 +85,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -92,7 +98,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,6 +115,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,12 +155,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ClassMeta.cpp" />
-    <ClCompile Include="Disassembler.cpp" />
-    <ClCompile Include="ImGuiApp.cpp" />
     <ClCompile Include="Dll.cpp" />
-    <ClCompile Include="dx12\imgui_impl_dx12.cpp" />
-    <ClCompile Include="dx12\imgui_impl_win32.cpp" />
+    <ClCompile Include="gui\dx12\imgui_impl_dx12.cpp" />
+    <ClCompile Include="gui\dx12\imgui_impl_win32.cpp" />
+    <ClCompile Include="gui\ImGuiApp.cpp" />
+    <ClCompile Include="helpers\ClassMeta.cpp" />
+    <ClCompile Include="helpers\Disassembler.cpp" />
+    <ClCompile Include="helpers\Exporter.cpp" />
+    <ClCompile Include="helpers\Importer.cpp" />
     <ClCompile Include="helpers\Memory.cpp" />
     <ClCompile Include="helpers\ModuleUtils.cpp" />
     <ClCompile Include="helpers\RTTI.cpp" />
@@ -161,13 +171,15 @@
     <ClCompile Include="helpers\VTables.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClassMeta.h" />
-    <ClInclude Include="Disassembler.h" />
-    <ClInclude Include="ImGuiApp.h" />
-    <ClInclude Include="custom_config.h" />
     <ClInclude Include="Dll.h" />
-    <ClInclude Include="dx12\imgui_impl_dx12.h" />
-    <ClInclude Include="dx12\imgui_impl_win32.h" />
+    <ClInclude Include="gui\custom_config.h" />
+    <ClInclude Include="gui\dx12\imgui_impl_dx12.h" />
+    <ClInclude Include="gui\dx12\imgui_impl_win32.h" />
+    <ClInclude Include="gui\ImGuiApp.h" />
+    <ClInclude Include="helpers\ClassMeta.h" />
+    <ClInclude Include="helpers\Disassembler.h" />
+    <ClInclude Include="helpers\Exporter.h" />
+    <ClInclude Include="helpers\Importer.h" />
     <ClInclude Include="helpers\Memory.h" />
     <ClInclude Include="helpers\ModuleUtils.h" />
     <ClInclude Include="helpers\RTTI.h" />

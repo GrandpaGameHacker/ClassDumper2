@@ -218,3 +218,44 @@ void ImGuiApp::ShutdownBackend()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 }
+
+void ImGuiApp::RenderFrame()
+{
+        // Rendering
+        ImGui::Render();
+
+        FrameContext* frameCtx = WaitForNextFrameResources();
+        UINT backBufferIdx = m_pSwapChain->GetCurrentBackBufferIndex();
+        frameCtx->CommandAllocator->Reset();
+
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = m_mainRenderTargetResource[backBufferIdx];
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        m_pd3dCommandList->Reset(frameCtx->CommandAllocator, NULL);
+        m_pd3dCommandList->ResourceBarrier(1, &barrier);
+
+        // Render Dear ImGui graphics
+        const float backgroundColor[4] = { 0, 0, 0, 1.0 };
+        m_pd3dCommandList->ClearRenderTargetView(m_mainRenderTargetDescriptor[backBufferIdx], backgroundColor, 0, NULL);
+        m_pd3dCommandList->OMSetRenderTargets(1, &m_mainRenderTargetDescriptor[backBufferIdx], FALSE, NULL);
+        m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dSrvDescHeap);
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pd3dCommandList);
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        m_pd3dCommandList->ResourceBarrier(1, &barrier);
+        m_pd3dCommandList->Close();
+
+        m_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&m_pd3dCommandList);
+
+        m_pSwapChain->Present(1, 0); // Present with vsync
+        //dxApp.m_pSwapChain->Present(0, 0); // Present without vsync
+
+        UINT64 fenceValue = m_fenceLastSignaledValue + 1;
+        m_pd3dCommandQueue->Signal(m_fence, fenceValue);
+        m_fenceLastSignaledValue = fenceValue;
+        frameCtx->FenceValue = fenceValue;
+}

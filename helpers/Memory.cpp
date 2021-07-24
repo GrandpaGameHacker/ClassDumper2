@@ -18,8 +18,25 @@ bool IsBadReadPointer(void* p)
 	return true;
 }
 
+bool IsBadReadPointerAligned(void* p)
+{
+	if ((uintptr_t)p % sizeof(uintptr_t) != 0) {
+		return true; // unaligned!
+	}
+	MEMORY_BASIC_INFORMATION mbi = { nullptr };
+	if (VirtualQuery(p, &mbi, sizeof(mbi)))
+	{
+		bool b = !(mbi.Protect & RWEMask);
+		if (mbi.Protect & BadPageMask) b = true;
+
+		return b;
+	}
+	return true;
+}
+
 // multithreaded memory scanner
 // slightly modified to reduce self references due to being in the same memory space
+// if I had a way of tracking all memory allocations and avoid our stack, I wouldn't have to do this
 std::vector<uintptr_t> FindAllInstances(uintptr_t VTable)
 {
 	//Customize to your liking how many threads

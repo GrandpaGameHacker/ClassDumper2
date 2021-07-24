@@ -1,8 +1,10 @@
 #pragma once
 #include <Windows.h>
-#include "ImGuiApp.h"
-#include "Disassembler.h"
-#include "ClassMeta.h"
+#include "gui/ImGuiApp.h"
+#include "helpers/Exporter.h"
+#include "helpers/Importer.h"
+#include "helpers/ClassMeta.h"
+#include "helpers/Disassembler.h"
 #include "helpers/VTables.h"
 #include "helpers/ModuleUtils.h"
 #include "helpers/StringConversions.h"
@@ -53,10 +55,14 @@ static Disassembler disasm = Disassembler();
 static std::vector<std::string> DisassembledInstructions;
 
 void MainGUI();
+void Dump();
 void ClassViewer();
 void ClassInspector();
 bool RenameVFunctionPopup(std::string& functionName);
 bool DisassembleFunctionPopup();
+bool PreExportPopup();
+bool PreImportPopup();
 void InstanceTool();
-void ExportData();
-void RenderSceneDX12();
+void AutoStructureDissect();
+bool StructureDissectWindow();
+MemberType AutoGuessType(uintptr_t address);

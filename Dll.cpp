@@ -440,6 +440,13 @@ bool RenameVFunctionPopup(std::string& functionName)
             ImGui::EndPopup();
             return false;
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return false;
+        }
         ImGui::EndPopup();
         return true;
     }
@@ -456,7 +463,7 @@ bool DisassembleFunctionPopup()
                     }
              ImGui::EndChild();
         }
-        if (ImGui::Button("Done")) {
+        if (ImGui::Button("Close")){
             ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
             return false;
@@ -496,7 +503,13 @@ bool PreExportPopup()
             ImGui::EndPopup();
             return false;
         }
-
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return false;
+        }
 
         ImGui::EndPopup();
         return true;
@@ -523,6 +536,13 @@ bool PreImportPopup()
             if (!sFile.empty()) {
                 ImportClasses(sFile, importType, classes);
             }
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return false;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
             ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
             return false;

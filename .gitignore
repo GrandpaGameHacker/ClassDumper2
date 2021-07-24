@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/compiled/ClassDumper2.dll
+/compiled/ClassDumper2_64.dll

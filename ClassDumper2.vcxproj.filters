@@ -1,108 +1,46 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Dll">
-      <UniqueIdentifier>{79b1b7a2-3cc2-4930-a151-60dd9483d816}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX12_Helpers">
-      <UniqueIdentifier>{5169197c-85d0-47cb-95d1-fd093c3bae95}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Helpers">
-      <UniqueIdentifier>{c99a47c8-6ec6-4283-8841-1768fc878848}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GUI">
-      <UniqueIdentifier>{47461b43-71c0-4dac-a231-100cebac487f}</UniqueIdentifier>
-    </Filter>
+    <ClInclude Include="ClassDumper2.h" />
+    <ClInclude Include="GUI\Helpers\custom_config.h" />
+    <ClInclude Include="GUI\Helpers\ImGuiApp.h" />
+    <ClInclude Include="GUI\Helpers\DX12\imgui_impl_dx12.h" />
+    <ClInclude Include="GUI\Helpers\DX12\imgui_impl_win32.h" />
+    <ClInclude Include="RTTI\RTTI.h" />
+    <ClInclude Include="GUI\Interfaces\IWindow.h" />
+    <ClInclude Include="GUI\GuiState.h" />
+    <ClInclude Include="GUI\MainWindow.h" />
+    <ClInclude Include="RTTI\VTable.h" />
+    <ClInclude Include="RTTI\Symbols.h" />
+    <ClInclude Include="W32\Memory.h" />
+    <ClInclude Include="W32\Modules.h" />
+    <ClInclude Include="W32\Disassembler.h" />
+    <ClInclude Include="Utility\StringConversion.h" />
+    <ClInclude Include="Serialization\Serializer.h" />
+    <ClInclude Include="RTTI\ClassMetadata.h" />
+    <ClInclude Include="GUI\InstanceToolWindow.h" />
+    <ClInclude Include="GUI\ClassInspectorWindow.h" />
+    <ClInclude Include="GUI\ClassViewerWindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Dll.cpp">
-      <Filter>Dll</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\Memory.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\ModuleUtils.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\RTTI.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\StringConversions.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\Symbols.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\VTables.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="gui\ImGuiApp.cpp">
-      <Filter>DX12_Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\ClassMeta.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\Disassembler.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="gui\dx12\imgui_impl_dx12.cpp">
-      <Filter>DX12_Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="gui\dx12\imgui_impl_win32.cpp">
-      <Filter>DX12_Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\Exporter.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\Importer.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Dll.h">
-      <Filter>Dll</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\Memory.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\ModuleUtils.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\RTTI.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\StringConversions.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\Symbols.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\VTables.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="gui\custom_config.h">
-      <Filter>DX12_Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="gui\ImGuiApp.h">
-      <Filter>DX12_Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\ClassMeta.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\Disassembler.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="gui\dx12\imgui_impl_dx12.h">
-      <Filter>DX12_Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="gui\dx12\imgui_impl_win32.h">
-      <Filter>DX12_Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\Exporter.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\Importer.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
+    <ClCompile Include="ClassDumper2.cpp" />
+    <ClCompile Include="GUI\Helpers\ImGuiApp.cpp" />
+    <ClCompile Include="GUI\Helpers\DX12\imgui_impl_dx12.cpp" />
+    <ClCompile Include="GUI\Helpers\DX12\imgui_impl_win32.cpp" />
+    <ClCompile Include="RTTI\RTTI.cpp" />
+    <ClCompile Include="GUI\Interfaces\IWindow.cpp" />
+    <ClCompile Include="GUI\GuiState.cpp" />
+    <ClCompile Include="GUI\MainWindow.cpp" />
+    <ClCompile Include="RTTI\VTable.cpp" />
+    <ClCompile Include="RTTI\Symbols.cpp" />
+    <ClCompile Include="W32\Memory.cpp" />
+    <ClCompile Include="W32\Modules.cpp" />
+    <ClCompile Include="W32\Disassembler.cpp" />
+    <ClCompile Include="Utility\StringConversion.cpp" />
+    <ClCompile Include="Serialization\Serializer.cpp" />
+    <ClCompile Include="RTTI\ClassMetadata.cpp" />
+    <ClCompile Include="GUI\InstanceToolWindow.cpp" />
+    <ClCompile Include="GUI\ClassInspectorWindow.cpp" />
+    <ClCompile Include="GUI\ClassViewerWindow.cpp" />
   </ItemGroup>
 </Project>

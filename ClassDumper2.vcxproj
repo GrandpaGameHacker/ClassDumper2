@@ -21,11 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{89e56245-d791-4066-8c5c-fec81c6ff2ad}</ProjectGuid>
-    <RootNamespace>ClassDumper2</RootNamespace>
+    <ProjectGuid>{28b422ba-f827-4055-a44c-f1930a4ec414}</ProjectGuid>
+    <RootNamespace>ClassDumper2Refactor</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
-    <VcpkgTriplet Condition="'$(Platform)'=='Win32'">x86-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -74,28 +72,34 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\compiled\</OutDir>
+    <OutDir>$(SolutionDir)\Compiled\</OutDir>
     <TargetName>$(ProjectName)_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\compiled\</OutDir>
+    <OutDir>$(SolutionDir)\Compiled\</OutDir>
+    <TargetName>$(ProjectName)_release</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)\compiled\</OutDir>
-    <TargetName>$(ProjectName)_debug64</TargetName>
+    <OutDir>$(SolutionDir)\Compiled\</OutDir>
+    <TargetName>$(ProjectName)_64_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\compiled\</OutDir>
-    <TargetName>$(ProjectName)_64</TargetName>
+    <TargetName>$(ProjectName)_64_release</TargetName>
+    <OutDir>$(SolutionDir)\Compiled\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
   </PropertyGroup>
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -104,9 +108,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,8 +124,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <Optimization>MaxSpeed</Optimization>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +140,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,8 +156,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <ExceptionHandling>Async</ExceptionHandling>
-      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,37 +167,47 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Dll.cpp" />
-    <ClCompile Include="gui\dx12\imgui_impl_dx12.cpp" />
-    <ClCompile Include="gui\dx12\imgui_impl_win32.cpp" />
-    <ClCompile Include="gui\ImGuiApp.cpp" />
-    <ClCompile Include="helpers\ClassMeta.cpp" />
-    <ClCompile Include="helpers\Disassembler.cpp" />
-    <ClCompile Include="helpers\Exporter.cpp" />
-    <ClCompile Include="helpers\Importer.cpp" />
-    <ClCompile Include="helpers\Memory.cpp" />
-    <ClCompile Include="helpers\ModuleUtils.cpp" />
-    <ClCompile Include="helpers\RTTI.cpp" />
-    <ClCompile Include="helpers\StringConversions.cpp" />
-    <ClCompile Include="helpers\Symbols.cpp" />
-    <ClCompile Include="helpers\VTables.cpp" />
+    <ClInclude Include="ClassDumper2.h" />
+    <ClInclude Include="GUI\ClassViewerWindow.h" />
+    <ClInclude Include="GUI\ClassInspectorWindow.h" />
+    <ClInclude Include="GUI\InstanceToolWindow.h" />
+    <ClInclude Include="RTTI\ClassMetadata.h" />
+    <ClInclude Include="Serialization\Serializer.h" />
+    <ClInclude Include="Utility\StringConversion.h" />
+    <ClInclude Include="W32\Disassembler.h" />
+    <ClInclude Include="GUI\GuiState.h" />
+    <ClInclude Include="GUI\Helpers\custom_config.h" />
+    <ClInclude Include="GUI\Helpers\DX12\imgui_impl_dx12.h" />
+    <ClInclude Include="GUI\Helpers\DX12\imgui_impl_win32.h" />
+    <ClInclude Include="GUI\Helpers\ImGuiApp.h" />
+    <ClInclude Include="GUI\Interfaces\IWindow.h" />
+    <ClInclude Include="GUI\MainWindow.h" />
+    <ClInclude Include="W32\Modules.h" />
+    <ClInclude Include="W32\Memory.h" />
+    <ClInclude Include="RTTI\RTTI.h" />
+    <ClInclude Include="RTTI\Symbols.h" />
+    <ClInclude Include="RTTI\VTable.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Dll.h" />
-    <ClInclude Include="gui\custom_config.h" />
-    <ClInclude Include="gui\dx12\imgui_impl_dx12.h" />
-    <ClInclude Include="gui\dx12\imgui_impl_win32.h" />
-    <ClInclude Include="gui\ImGuiApp.h" />
-    <ClInclude Include="helpers\ClassMeta.h" />
-    <ClInclude Include="helpers\Disassembler.h" />
-    <ClInclude Include="helpers\Exporter.h" />
-    <ClInclude Include="helpers\Importer.h" />
-    <ClInclude Include="helpers\Memory.h" />
-    <ClInclude Include="helpers\ModuleUtils.h" />
-    <ClInclude Include="helpers\RTTI.h" />
-    <ClInclude Include="helpers\StringConversions.h" />
-    <ClInclude Include="helpers\Symbols.h" />
-    <ClInclude Include="helpers\VTables.h" />
+    <ClCompile Include="ClassDumper2.cpp" />
+    <ClCompile Include="GUI\ClassViewerWindow.cpp" />
+    <ClCompile Include="GUI\ClassInspectorWindow.cpp" />
+    <ClCompile Include="GUI\InstanceToolWindow.cpp" />
+    <ClCompile Include="RTTI\ClassMetadata.cpp" />
+    <ClCompile Include="Serialization\Serializer.cpp" />
+    <ClCompile Include="Utility\StringConversion.cpp" />
+    <ClCompile Include="W32\Disassembler.cpp" />
+    <ClCompile Include="GUI\GuiState.cpp" />
+    <ClCompile Include="GUI\Helpers\DX12\imgui_impl_dx12.cpp" />
+    <ClCompile Include="GUI\Helpers\DX12\imgui_impl_win32.cpp" />
+    <ClCompile Include="GUI\Helpers\ImGuiApp.cpp" />
+    <ClCompile Include="GUI\Interfaces\IWindow.cpp" />
+    <ClCompile Include="GUI\MainWindow.cpp" />
+    <ClCompile Include="W32\Modules.cpp" />
+    <ClCompile Include="W32\Memory.cpp" />
+    <ClCompile Include="RTTI\RTTI.cpp" />
+    <ClCompile Include="RTTI\Symbols.cpp" />
+    <ClCompile Include="RTTI\VTable.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

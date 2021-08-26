@@ -47,15 +47,14 @@ DWORD __stdcall ClassDumper2::MainThread(void* lpParam)
 	SetWindowLong(DXWindow, GWL_STYLE, 0);
 	ShowWindow(DXWindow, SW_SHOWMAXIMIZED);
 	UpdateWindow(DXWindow);
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.IniFilename = NULL;
 	ImGui::StyleColorsDark();
 	DXApp.SetupBackend();
-	GuiState::Init();
-	GuiState::GuiLoop();
+	GS::Init();
+	GS::GuiLoop();
 
 	CleanExit();
 	return 0;

@@ -9,6 +9,8 @@ class ClassInspectorWindow :
 	bool RenameVFunctionPopup(std::string &functionName);
 	bool DisassembleFunctionPopup();
 	bool StructureDissectWindow();
+	const ImVec2 WindowPos = ImVec2{ 900,0 };
+	const ImVec2 WindowSize = ImVec2{ 600,1075 };
 #ifdef _WIN64
 	const char* POINTER_METAFMTSTR = "CompleteObjectLocator: %llX";
 	const char* POINTER_FMTSTRING = "%llX";
@@ -17,6 +19,7 @@ class ClassInspectorWindow :
 	const char* POINTER_METAFMTSTR = "CompleteObjectLocator: %X";
 	const char* POINTER_FMTSTRING = "%X";
 	const char* VTABLE_FMTSTRING = "%d - %X  - %s";
+
 #endif
 };
 

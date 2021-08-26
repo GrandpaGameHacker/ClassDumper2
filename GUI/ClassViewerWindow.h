@@ -10,6 +10,6 @@ class ClassViewerWindow : public IWindow
 	const char* _Interface = "\tinterface : %s";
 	const char* _Class = "class %s";
 	const ImVec2 WindowPos = ImVec2{ 0,101 };
-	const ImVec2 WindowSize = ImVec2{ 900,950 };
+	const ImVec2 WindowSize = ImVec2{ 900,975 };
 };
 

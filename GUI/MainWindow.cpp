@@ -7,25 +7,6 @@ void MainWindow::Draw()
 {
     if (ImGui::Begin(WindowTitle, 0, ImGuiWindowFlags_NoMove))
     {
-        ImGui::Text("Target Module:");
-        ImGui::SameLine();
-        if (ImGui::BeginCombo("##combo", GS::currentItem))
-        {
-            for (unsigned int n = 0; n < GS::modules.size(); n++) {
-                bool is_selected = (GS::currentItem == GS::modules[n]->szModule);
-                if (ImGui::Selectable(GS::modules[n]->szModule, is_selected)) {
-                    GS::currentItem = GS::modules[n]->szModule;
-                    GS::targetModule = GS::modules[n];
-                }
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndCombo();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Refresh")) {
-            GS::modules = GetModuleList(ClassDumper2::hSelf);
-        }
         ImGui::PushStyleColor(ImGuiCol_Button, DumpButtonColor);
         if (ImGui::Button("Dump!") && GS::targetModule != nullptr)
         {
@@ -52,7 +33,25 @@ void MainWindow::Draw()
             OnExitButton();
         }
         ImGui::PopStyleColor();
-        ImGui::Text("Search bar:"); ImGui::SameLine();
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 3);
+        if (ImGui::BeginCombo("##combo", GS::currentItem))
+        {
+            for (unsigned int n = 0; n < GS::modules.size(); n++) {
+                bool is_selected = (GS::currentItem == GS::modules[n]->szModule);
+                if (ImGui::Selectable(GS::modules[n]->szModule, is_selected)) {
+                    GS::currentItem = GS::modules[n]->szModule;
+                    GS::targetModule = GS::modules[n];
+                }
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+        if (ImGui::Button("Refresh")) {
+            GS::modules = GetModuleList(ClassDumper2::hSelf);
+        }
         SearchBarRender();
         if (GS::exportPopupState) {
             GS::exportPopupState = PreExportPopup();

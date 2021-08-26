@@ -53,8 +53,8 @@ void InstanceToolWindow::Draw()
                 }
             }
         }
-        ImGui::SetWindowPos(ImVec2{ 1500,0 });
-        ImGui::SetWindowSize(ImVec2{ 600,1050 });
+        ImGui::SetWindowPos(WindowPos);
+        ImGui::SetWindowSize(WindowSize);
         ImGui::End();
     }
 

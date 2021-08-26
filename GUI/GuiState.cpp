@@ -37,18 +37,23 @@ void GuiState::Init()
     if(!bCreated){
         
         bCreated = true;
-
+        ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
         static MainWindow mainWindow = MainWindow();
         static ClassViewerWindow classViewerWindow = ClassViewerWindow();
         static ClassInspectorWindow classWindow = ClassInspectorWindow();
         static InstanceToolWindow instanceWindow = InstanceToolWindow();
-        
+
+
         mainWindow.Enable();
         classViewerWindow.Enable();
         classWindow.Enable();
         instanceWindow.Enable();
 
+        strcpy_s(searchBuffer, "search here...");
         modules = GetModuleList(ClassDumper2::hSelf);
+        currentItem = modules[0]->szModule;
+        targetModule = modules[0];
+        mainWindow.OnDumpButton();
     }
 }
 

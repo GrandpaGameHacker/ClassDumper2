@@ -4,8 +4,10 @@
 class MainWindow :
     public IWindow
 {
+public:
     virtual void Draw() override;
     void OnDumpButton();
+private:
     void SearchBarRender();
     void OnExitButton();
     bool PreExportPopup();

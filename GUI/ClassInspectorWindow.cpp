@@ -18,18 +18,12 @@ void ClassInspectorWindow::Draw()
             std::string VTableString = IntegerToHexStr((uintptr_t)GS::currentClass->VTable ^ 0xDEADBEEF);
             ImGui::Text("%s - VTable at %s", GS::currentClass->className.c_str(), VTableString.c_str());
             if (ImGui::IsItemClicked())
-            {
-                char buffer[256] = { 0 };
-                sprintf_s(buffer, "%s - %s", VTableString.c_str(), GS::currentClass->className.c_str());
-                ImGui::SetClipboardText(buffer);
-            }
-            ImGui::Text(POINTER_METAFMTSTR, (uintptr_t)GS::currentClass->Meta);
-            if (ImGui::IsItemClicked()) {
-                char buffer[256] = { 0 };
-                sprintf_s(buffer, POINTER_FMTSTRING, (uintptr_t)GS::currentClass->Meta);
+                GS::CopyToClipboard("%s - %s", VTableString.c_str(), GS::currentClass->className.c_str());
 
-                ImGui::SetClipboardText(buffer);
-            }
+            ImGui::Text(POINTER_METAFMTSTR, (uintptr_t)GS::currentClass->Meta);
+            if (ImGui::IsItemClicked())
+                GS::CopyToClipboard(POINTER_FMTSTRING, (uintptr_t)GS::currentClass->Meta);
+
             ImGui::Spacing();
             ImGui::Spacing();
             ImGui::Separator();
@@ -98,16 +92,17 @@ void ClassInspectorWindow::Draw()
             {
                 bool vfmenuState = false;
                 auto vfs = GS::currentClass->VirtualFunctions;
+
                 for (unsigned int i = 0; i < vfs.size(); i++) {
+
                     ImGui::TextColored({ 250,0,130,1 }, VTABLE_FMTSTRING, i, vfs[i], GS::currentClass->VirtualFunctionNames[i].c_str());
-                    if (ImGui::IsItemClicked()) {
-                        char buffer[256] = { 0 };
-                        sprintf_s(buffer, VTABLE_FMTSTRING, i, vfs[i], GS::currentClass->VirtualFunctionNames[i].c_str());
-                        ImGui::SetClipboardText(buffer);
-                    }
-                    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+
+                    if (ImGui::IsItemClicked())
+                        GS::CopyToClipboard(VTABLE_FMTSTRING, i, vfs[i], GS::currentClass->VirtualFunctionNames[i].c_str());
+
+                    if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
                         vfindex = i;
-                    }
+
                     if (!vfmenuState) {
                         if (ImGui::BeginPopupContextItem("FunctionContext"))
                         {
@@ -145,7 +140,7 @@ void ClassInspectorWindow::Draw()
     }
 }
 
-bool ClassInspectorWindow::RenameVFunctionPopup(std::string functionName)
+bool ClassInspectorWindow::RenameVFunctionPopup(std::string &functionName)
 {
 
     ImGui::OpenPopup("Rename Function");

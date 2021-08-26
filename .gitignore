@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /compiled/ClassDumper2.dll
 /compiled/ClassDumper2_64.dll
+/Compiled/ClassDumper2_release.dll
+/Compiled/ClassDumper2_debug.dll

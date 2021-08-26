@@ -6,7 +6,7 @@ class ClassInspectorWindow :
 	public IWindow
 {
 	void Draw() override;
-	bool RenameVFunctionPopup(std::string functionName);
+	bool RenameVFunctionPopup(std::string &functionName);
 	bool DisassembleFunctionPopup();
 	bool StructureDissectWindow();
 #ifdef _WIN64

@@ -23,7 +23,7 @@ void ClassViewerWindow::Draw()
                 else
                     fmt += _Class;
                 if (classMetadata->bInterface)
-                    ImGui::Text(fmt.c_str(), classMetadata->className.c_str(), classMetadata->interfaceName.c_str());
+                    ImGui::Text(fmt.c_str(), classMetadata->interfaceName.c_str());
                 else
                     ImGui::Text(fmt.c_str(), classMetadata->className.c_str());
                 if (ImGui::IsItemClicked())

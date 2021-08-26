@@ -75,3 +75,13 @@ void GuiState::GuiLoop()
     }
 
 }
+
+void GuiState::CopyToClipboard(const char* format, ...)
+{
+    char buffer[1024] = { 0 };
+    va_list v1;
+    va_start(v1, format);
+    vsnprintf(buffer, 1024, format, v1);
+    va_end(v1);
+    ImGui::SetClipboardText(buffer);
+}

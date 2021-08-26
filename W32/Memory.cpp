@@ -40,8 +40,9 @@ bool IsBadReadPointerAligned(void* p)
 // if I had a way of tracking all memory allocations and avoid our stack, I wouldn't have to do this
 std::vector<uintptr_t> FindAllInstances(uintptr_t VTable)
 {
-	//Customize to your liking how many threads
-	//keep in mind in release versions you'll get self references more often due to optimizations
+	// Customize to your liking how many threads
+	// keep in mind in release versions you'll get self references more often due to optimizations
+	// genuinely thinking about an algorithm that avoids this nastiness
 	const unsigned int threads = 12;
 	std::vector<uintptr_t> instances;
 
@@ -121,6 +122,7 @@ std::vector<uintptr_t> FindReferences(uintptr_t startAddress, size_t length, uin
 			resultsList.push_back(realAddress);
 		}
 	}
+	memset((void*)newmem, 0, length);
 	free((void*)newmem);
 	return resultsList;
 }

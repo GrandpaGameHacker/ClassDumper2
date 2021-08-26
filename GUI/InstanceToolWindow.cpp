@@ -13,7 +13,7 @@ void InstanceToolWindow::Draw()
             GS::instances = FindAllInstances((uintptr_t)GS::currentClass->VTable);
         }
         if (GS::instances.size() != 0) {
-            ImGui::Text("found %d instances in memory", GS::instances.size());
+            ImGui::Text("Found %d instances in memory", GS::instances.size());
             for (unsigned int i = 0; i < GS::instances.size(); i++) {
                 bool badVtable = false;
                 if (GS::currentClass) {
@@ -22,9 +22,7 @@ void InstanceToolWindow::Draw()
                         {
                             ImGui::TextColored({ 255,0,0,1 }, POINTER_FMTSTRING, GS::instances[i]);
                             if (ImGui::IsItemClicked()) {
-                                char buffer[256] = { 0 };
-                                sprintf_s(buffer, POINTER_FMTSTRING, GS::instances[i]);
-                                ImGui::SetClipboardText(buffer);
+                                GS::CopyToClipboard(POINTER_FMTSTRING, GS::instances[i]);
                             }
                             badVtable = true;
                         }
@@ -32,9 +30,8 @@ void InstanceToolWindow::Draw()
                     else {
                         ImGui::TextColored({ 255,0,0,1 }, POINTER_FMTSTRING, GS::instances[i]);
                         if (ImGui::IsItemClicked()) {
-                            char buffer[256] = { 0 };
-                            sprintf_s(buffer, POINTER_FMTSTRING, GS::instances[i]);
-                            ImGui::SetClipboardText(buffer);
+                            GS::CopyToClipboard(POINTER_FMTSTRING, GS::instances[i]);
+
                         }
                         badVtable = true;
                     }
@@ -42,21 +39,17 @@ void InstanceToolWindow::Draw()
                 if (!badVtable) {
                     ImGui::TextColored({ 0,255,0,1 }, POINTER_FMTSTRING, GS::instances[i]);
                     if (ImGui::IsItemClicked()) {
-                        char buffer[256] = { 0 };
-                        sprintf_s(buffer, POINTER_FMTSTRING, GS::instances[i]);
-                        ImGui::SetClipboardText(buffer);
+                        GS::CopyToClipboard(POINTER_FMTSTRING, GS::instances[i]);
                     }
                 }
             }
         }
         if (GS::codeReferences.size() != 0) {
-            ImGui::Text("found %d vtable references in code", GS::codeReferences.size());
+            ImGui::Text("Found %d vtable references in code", GS::codeReferences.size());
             for (unsigned int i = 0; i < GS::codeReferences.size(); i++) {
                 ImGui::TextColored({ 0,255,225,1 }, POINTER_FMTSTRING, GS::codeReferences[i]);
                 if (ImGui::IsItemClicked()) {
-                    char buffer[256] = { 0 };
-                    sprintf_s(buffer, POINTER_FMTSTRING, GS::codeReferences[i]);
-                    ImGui::SetClipboardText(buffer);
+                    GS::CopyToClipboard(POINTER_FMTSTRING, GS::codeReferences[i]);
                 }
             }
         }

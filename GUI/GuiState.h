@@ -12,6 +12,7 @@ struct GuiState
 	void operator=(GuiState const&) = delete;
 	static void Init();
 	static void GuiLoop();
+	static void CopyToClipboard(const char* format, ...);
 	//MainWindow
 
 	static std::vector<uintptr_t> VTables;

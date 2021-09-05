@@ -1,6 +1,5 @@
 #include "ClassInspectorWindow.h"
 #include "GuiState.h"
-
 bool disassemblerState = false;
 bool structureDissectState = false;
 bool renamingState = false;
@@ -79,8 +78,8 @@ void ClassInspectorWindow::Draw()
             ImGui::Checkbox("Lock Size", &GS::currentClass->size_locked);
 
             if (ImGui::Button("Auto Dissect")) {
-               /* AutoStructureDissect();
-                structureDissectState = true;*/
+               AutoStructureDissect();
+               structureDissectState = true;
 
             }
 
@@ -188,6 +187,93 @@ bool ClassInspectorWindow::DisassembleFunctionPopup()
     return false;
 }
 
+void ClassInspectorWindow::AutoStructureDissect()
+{
+    auto size = GS::currentClass->size;
+    if (size == 0) return;
+    if (GS::instances.size() == 0) return;
+
+    GS::currentClass->members.clear();
+    unsigned int i = 0;
+    size_t offset = 0;
+    while (1)
+    {
+        if (offset >= size) break;
+
+        auto address = GS::instances[i] + offset;
+        size_t member_size = 0;
+        MemberType type = AutoGuessMember(address);
+
+        switch (type)
+        {
+        case MemberType::type_boolean:
+        case MemberType::type_byte:
+            member_size = sizeof(type_byte);
+            break;
+
+        case MemberType::type_signed_dword:
+        case MemberType::type_dword:
+        case MemberType::type_float:
+            member_size = sizeof(float);
+            break;
+
+        case MemberType::type_signed_qword:
+        case MemberType::type_qword:
+        case MemberType::type_double:
+            member_size = sizeof(double);
+            break;
+
+        case MemberType::type_pointer:
+            member_size = sizeof(uintptr_t);
+            break;
+
+        case MemberType::type_string:
+            member_size = strlen((const char*)address);
+            break;
+
+        default:
+            type = MemberType::type_byte;
+            member_size = 1;
+            break;
+        }
+
+        MemberVariable* member = new MemberVariable();
+        member->baseAddress = GS::instances[i];
+        member->offset = offset;
+        member->type = type;
+        member->size = member_size;
+        member->stype = MemberType_str[member->type];
+        GS::currentClass->members.push_back(member);
+        offset += member_size;
+    }
+}
+
+MemberType ClassInspectorWindow::AutoGuessMember(uintptr_t address)
+{
+    float f = *(float*)address;
+    double db = *(double*)address;
+    unsigned long long qw = *(unsigned long long*) address;
+    uintptr_t ptr = *(uintptr_t*)address;
+
+    if (qw == 0)
+        return MemberType::type_dword;
+
+    if (!IsBadReadPointer((void*)ptr))
+        if (address % sizeof(uintptr_t) != 1)
+            return MemberType::type_pointer;
+
+    if (std::isnormal(f) && f > 0.0001 && f < 100000)
+        return MemberType::type_float;
+
+    if (std::isnormal(db) && db > 0.0001 && db < 100000)
+        return MemberType::type_double;
+
+    if (std::string((char*)address).size() > 5)
+        return MemberType::type_string;
+
+    return MemberType::type_dword;
+}
+
 bool ClassInspectorWindow::StructureDissectWindow()
 {
     if (GS::currentClass->members.size() == 0) return false;
@@ -197,7 +283,7 @@ bool ClassInspectorWindow::StructureDissectWindow()
         ImGui::SetWindowSize(ImVec2{ 600,1050 });
         ImGui::Text(POINTER_FMTSTRING, GS::currentClass->members[0]->baseAddress);
         for (auto member : GS::currentClass->members) {
-            /*ImGui::Text("%d | %s | %s", member->offset, member->name, MemberType_str[member->type]);*/
+        // broken    ImGui::Text("%d | %s | %s", member->offset, member->name.c_str(), member->stype);
         }
         ImGui::End();
     }

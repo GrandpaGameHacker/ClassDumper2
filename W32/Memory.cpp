@@ -1,5 +1,7 @@
 #include "Memory.h"
 #include "Memory.h"
+#include "imgui.h";
+#include "..\ClassDumper2.h"
 const DWORD RWEMask = (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE |
 	PAGE_EXECUTE_WRITECOPY);
 
@@ -40,10 +42,8 @@ bool IsBadReadPointerAligned(void* p)
 // if I had a way of tracking all memory allocations and avoid our stack, I wouldn't have to do this
 std::vector<uintptr_t> FindAllInstances(uintptr_t VTable)
 {
-	// Customize to your liking how many threads
 	// keep in mind in release versions you'll get self references more often due to optimizations
 	// genuinely thinking about an algorithm that avoids this nastiness
-	const unsigned int threads = 12;
 	std::vector<uintptr_t> instances;
 
 	if (!VTable) {
@@ -71,31 +71,25 @@ std::vector<uintptr_t> FindAllInstances(uintptr_t VTable)
 		memcpy(p_mbi, &mbi, sizeof(mbi));
 		mbiList.push_back(p_mbi);
 	}
-	bool notDone = true;
 	unsigned int mbiIndex = 0;
 	size_t mbiMax = mbiList.size();
-	std::vector<uintptr_t> results[threads];
-	std::future<std::vector<uintptr_t>> futures[threads];
-	// run scans
-	while (notDone) {
-		if (mbiIndex == mbiMax) notDone = false;
-		for (unsigned int i = 0; i < threads; i++) {
-			if (mbiIndex < mbiMax) {
-				MEMORY_BASIC_INFORMATION* currentMbi = mbiList[mbiIndex];
-				mbiIndex++;
-				if (currentMbi) {
-					futures[i] = std::async(FindReferences, (intptr_t)currentMbi->BaseAddress, currentMbi->RegionSize, VTable);
-				}
-			}
-		}
-		for (unsigned int i = 0; i < threads; i++) {
-			if (futures[i].valid()) {
-				auto temp = futures[i].get();
-				instances.insert(instances.end(), temp.begin(), temp.end());
+	std::vector<uintptr_t> results(mbiMax);
+	std::vector<std::future<std::vector<uintptr_t>>> futures;
+	for (unsigned int i = 0; i < mbiMax; i++) {
+		if (mbiIndex < mbiMax) {
+			MEMORY_BASIC_INFORMATION* currentMbi = mbiList[mbiIndex];
+			mbiIndex++;
+			if (currentMbi) {
+				futures.push_back(std::async(FindReferences, (intptr_t)currentMbi->BaseAddress, currentMbi->RegionSize, VTable));
 			}
 		}
 	}
-
+	for (unsigned int i = 0; i < mbiMax; i++) {
+		if (futures[i].valid()) {
+			auto temp = futures[i].get();
+			instances.insert(instances.end(), temp.begin(), temp.end());
+		}
+	}
 	mbiList.clear();
 	return instances;
 }

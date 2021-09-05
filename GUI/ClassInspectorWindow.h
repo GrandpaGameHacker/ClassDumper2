@@ -1,5 +1,6 @@
 #pragma once
 #include "Interfaces/IWindow.h"
+#include "..\RTTI\ClassMetadata.h"
 #include <string>
 
 class ClassInspectorWindow :
@@ -9,6 +10,8 @@ class ClassInspectorWindow :
 	bool RenameVFunctionPopup(std::string &functionName);
 	bool DisassembleFunctionPopup();
 	bool StructureDissectWindow();
+	void AutoStructureDissect();
+	MemberType AutoGuessMember(uintptr_t address);
 	const ImVec2 WindowPos = ImVec2{ 900,0 };
 	const ImVec2 WindowSize = ImVec2{ 600,1075 };
 #ifdef _WIN64

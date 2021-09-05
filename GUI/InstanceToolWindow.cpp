@@ -1,5 +1,6 @@
 #include "InstanceToolWindow.h"
 #include "GuiState.h"
+
 void InstanceToolWindow::Draw()
 {
     if (ImGui::Begin("Scanner Tool", 0, ImGuiWindowFlags_NoResize)) {
@@ -11,7 +12,8 @@ void InstanceToolWindow::Draw()
         if (ImGui::Button("Find Instances") && GS::currentClass) {
             GS::instances.clear();
             GS::instances = FindAllInstances((uintptr_t)GS::currentClass->VTable);
-            if (GS::instances.size() > 128) {
+            if (GS::instances.size() > 128)
+            {
                 GS::instances = std::vector<uintptr_t>(GS::instances.begin(), GS::instances.begin() + 128);
             }
         }

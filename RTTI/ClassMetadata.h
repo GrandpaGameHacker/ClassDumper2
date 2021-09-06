@@ -22,11 +22,20 @@ enum MemberType
 
 static const char* MemberType_str[] =
 {
-	"bool", "byte", "word",
-	"signed word", "dword",
-	"signed dword", "qword",
-	"signed qword", "pointer",
-	"float", "double", "string"
+	"bool", "unsigned char", "unsigned short",
+	"signed short", "unsigned int",
+	"signed int", "unsigned long long",
+	"long long", "void*",
+	"float", "double", "char"
+};
+
+static const char* MemberTypeName_str[] =
+{
+	"bool", "uchar", "ushort",
+	"short", "uint",
+	"int", "ulonglong",
+	"longlong", "ptr",
+	"float", "double", "char"
 };
 
 struct MemberVariable
@@ -36,7 +45,7 @@ struct MemberVariable
 	MemberType type = MemberType::type_boolean;
 	size_t size = 0;
 	std::string name = "";
-	std::string stype = "";
+	const char* stype = "";
 };
 
 struct ClassMetadata

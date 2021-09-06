@@ -12,6 +12,7 @@ void InstanceToolWindow::Draw()
         if (ImGui::Button("Find Instances") && GS::currentClass) {
             GS::instances.clear();
             GS::instances = FindAllInstances((uintptr_t)GS::currentClass->VTable);
+            std::reverse(GS::instances.begin(), GS::instances.end());
             if (GS::instances.size() > 128)
             {
                 GS::instances = std::vector<uintptr_t>(GS::instances.begin(), GS::instances.begin() + 128);

@@ -1,7 +1,5 @@
 #include "Memory.h"
 #include "Memory.h"
-#include "imgui.h";
-#include "..\ClassDumper2.h"
 const DWORD RWEMask = (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE |
 	PAGE_EXECUTE_WRITECOPY);
 

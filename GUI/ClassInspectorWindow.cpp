@@ -1,10 +1,12 @@
 #include "ClassInspectorWindow.h"
 #include "GuiState.h"
+#include <map>
 bool disassemblerState = false;
 bool structureDissectState = false;
 bool renamingState = false;
 char renameBuffer[256] = { 0 };
 unsigned int vfindex = 0;
+int nMemoryEntries = 4;
 
 void ClassInspectorWindow::Draw()
 {
@@ -71,17 +73,23 @@ void ClassInspectorWindow::Draw()
             }
             else {
                 ImGui::PushItemWidth(65.0f);
-                ImGui::InputScalar("", ImGuiDataType_U64, &GS::currentClass->size, nullptr, nullptr, "%08X", ImGuiInputTextFlags_CharsHexadecimal);
+                ImGui::InputScalar("#", ImGuiDataType_U64, &GS::currentClass->size, nullptr, nullptr, "%08X", ImGuiInputTextFlags_CharsHexadecimal);
                 ImGui::PopItemWidth();
             }
             ImGui::SameLine();
             ImGui::Checkbox("Lock Size", &GS::currentClass->size_locked);
 
-            if (ImGui::Button("Auto Dissect")) {
+            if (ImGui::Button("Auto Dissect Struct")) {
                AutoStructureDissect();
                structureDissectState = true;
-
             }
+
+            if (ImGui::Button("Advanced Auto Dissect Class")) {
+                //AutoStructureDissect();
+                //structureDissectState = true;
+            }
+            ImGui::InputInt("##", &nMemoryEntries);
+            ImGui::Text("Memory Entries to use for dissect...");
 
             ImGui::Spacing();
             ImGui::Spacing();
@@ -202,19 +210,19 @@ void ClassInspectorWindow::AutoStructureDissect()
 
         auto address = GS::instances[i] + offset;
         size_t member_size = 0;
-        MemberType type = AutoGuessMember(address);
+        MemberType type = AutoGuessMemberMulti(GS::instances, offset);
 
         switch (type)
         {
         case MemberType::type_boolean:
         case MemberType::type_byte:
-            member_size = sizeof(type_byte);
+            member_size = sizeof(char);
             break;
 
         case MemberType::type_signed_dword:
         case MemberType::type_dword:
         case MemberType::type_float:
-            member_size = sizeof(float);
+            member_size = sizeof(DWORD);
             break;
 
         case MemberType::type_signed_qword:
@@ -229,6 +237,10 @@ void ClassInspectorWindow::AutoStructureDissect()
 
         case MemberType::type_string:
             member_size = strlen((const char*)address);
+            if (member_size == 0) {
+                type = MemberType::type_dword;
+                member_size = sizeof(DWORD);
+            }
             break;
 
         default:
@@ -243,6 +255,7 @@ void ClassInspectorWindow::AutoStructureDissect()
         member->type = type;
         member->size = member_size;
         member->stype = MemberType_str[member->type];
+        if (offset == 0) member->name = "__vtable";
         GS::currentClass->members.push_back(member);
         offset += member_size;
     }
@@ -274,18 +287,89 @@ MemberType ClassInspectorWindow::AutoGuessMember(uintptr_t address)
     return MemberType::type_dword;
 }
 
+bool memberCmp(std::pair<MemberType, int>& a,
+    std::pair<MemberType, int>& b)
+{
+    return a.second < b.second;
+}
+
+MemberType ClassInspectorWindow::AutoGuessMemberMulti(std::vector<uintptr_t> BaseAddresses, uintptr_t offset)
+{
+    if (BaseAddresses.size() > nMemoryEntries) {
+        BaseAddresses = std::vector<uintptr_t>(BaseAddresses.begin(), BaseAddresses.begin() + nMemoryEntries);
+    }
+
+    size_t nAddresses = BaseAddresses.size();
+    std::map<MemberType, int> counts;
+    counts.emplace(MemberType::type_dword, 0);
+    counts.emplace(MemberType::type_float, 0);
+    counts.emplace(MemberType::type_double, 0);
+    counts.emplace(MemberType::type_string, 0);
+    counts.emplace(MemberType::type_pointer, 0);
+    for (auto baseAddress : BaseAddresses) {
+        auto membertype = AutoGuessMember(baseAddress + offset);
+        for (auto & x : counts) {
+            if (x.first == membertype) x.second++;
+        }
+    }
+    // Declare vector of pairs
+    std::vector<std::pair<MemberType, int> > sorted;
+
+    // Copy key-value pair from Map
+    // to vector of pairs
+    for (auto& it : counts) {
+        sorted.push_back(it);
+    }
+    std::sort(sorted.begin(), sorted.end(), memberCmp);
+    auto member = sorted.back().first;
+    return member;
+}
+
 bool ClassInspectorWindow::StructureDissectWindow()
 {
+    static std::string outputstr = "";
+    static bool bBufInit = false;
+    bool state = true;
     if (GS::currentClass->members.size() == 0) return false;
-
     if (ImGui::Begin("Structure Dissect")) {
 
-        ImGui::SetWindowSize(ImVec2{ 600,1050 });
-        ImGui::Text(POINTER_FMTSTRING, GS::currentClass->members[0]->baseAddress);
-        for (auto member : GS::currentClass->members) {
-        // broken    ImGui::Text("%d | %s | %s", member->offset, member->name.c_str(), member->stype);
+        ImGui::SetWindowSize(ImVec2{ 600,700});
+        if (!bBufInit) {
+            bBufInit = true;
+            std::stringstream ss;
+            ss << "struct " << GS::currentClass->className << " {\n";
+            for (auto member : GS::currentClass->members)
+            {
+                ss << "\t" << member->stype << " ";
+                if (member->name == "__vtable") {
+                    ss << member->name << ";\n";
+                }
+                else if (member->type == MemberType::type_string) {
+                    ss << MemberTypeName_str[member->type] << std::hex << member->offset << "[" << std::dec << member->size << "]" ";\n";
+                }
+                else if (member->name != "") {
+                    ss << member->name << std::hex << member->offset << ";\n";
+                }
+                else {
+                    ss << MemberTypeName_str[member->type] << std::hex << member->offset << ";\n";
+                }
+            }
+            ss << "};\n\0\0";
+            outputstr = ss.str();
+        }
+        ImGui::Text("Psuedo C struct");
+        ImGui::InputTextMultiline("", (char*)outputstr.c_str(), outputstr.size(), {600,600}, ImGuiInputTextFlags_ReadOnly);
+        if (ImGui::Button("Exit")) {
+            bBufInit = false;
+            outputstr = "";
+            state = false;
         }
         ImGui::End();
     }
-    return true;
+    return state;
+}
+
+bool ClassInspectorWindow::ClassDissectWindow()
+{
+    return false;
 }

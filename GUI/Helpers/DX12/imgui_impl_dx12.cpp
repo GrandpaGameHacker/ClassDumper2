@@ -1,3 +1,6 @@
+#include "imgui.h"
+#include "imgui_impl_dx12.h"
+#ifdef USE_DX12
 // dear imgui: Renderer for DirectX12
 // This needs to be used along with a Platform Binding (e.g. Win32)
 
@@ -28,8 +31,8 @@
 //  2018-06-08: DirectX12: Use draw_data->DisplayPos and draw_data->DisplaySize to setup projection matrix and clipping rectangle (to ease support for future multi-viewport).
 //  2018-02-22: Merged into master with all Win32 code synchronized to other examples.
 
-#include "imgui.h"
-#include "imgui_impl_dx12.h"
+
+
 
 // DirectX
 #include <d3d12.h>
@@ -670,3 +673,5 @@ void ImGui_ImplDX12_NewFrame()
     if (!g_pPipelineState)
         ImGui_ImplDX12_CreateDeviceObjects();
 }
+
+#endif

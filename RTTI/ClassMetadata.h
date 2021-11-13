@@ -17,7 +17,9 @@ enum MemberType
 	type_pointer,
 	type_float,
 	type_double,
-	type_string
+	type_string,
+	type_vtable,
+	type_error
 };
 
 static const char* MemberType_str[] =
@@ -26,7 +28,7 @@ static const char* MemberType_str[] =
 	"signed short", "unsigned int",
 	"signed int", "unsigned long long",
 	"long long", "void*",
-	"float", "double", "char"
+	"float", "double", "char", "void**", "error"
 };
 
 static const char* MemberTypeName_str[] =
@@ -35,7 +37,8 @@ static const char* MemberTypeName_str[] =
 	"short", "uint",
 	"int", "ulonglong",
 	"longlong", "ptr",
-	"float", "double", "char"
+	"float", "double", "char",
+	"vtable", "error"
 };
 
 struct MemberVariable

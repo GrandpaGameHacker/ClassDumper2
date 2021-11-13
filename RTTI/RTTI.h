@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+
 namespace RTTI
 {
 	struct PMD

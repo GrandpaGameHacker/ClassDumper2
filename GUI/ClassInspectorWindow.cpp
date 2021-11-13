@@ -244,7 +244,7 @@ void ClassInspectorWindow::AutoStructureDissect()
             break;
 
         default:
-            type = MemberType::type_byte;
+            type = MemberType::type_error;
             member_size = 1;
             break;
         }

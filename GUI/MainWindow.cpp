@@ -69,6 +69,11 @@ void MainWindow::Draw()
 
 void MainWindow::OnDumpButton()
 {
+    for (unsigned int i = 0; i < GS::VTables.size(); i++) {
+        GS::VTables[i] = NULL;
+    }
+    GS::VTables.resize(0);
+    GS::VTables.shrink_to_fit();
     GS::VTables.clear();
     GS::classes.clear();
     GS::targetSectionInfo = GetSectionInformation(GS::targetModule);
@@ -97,11 +102,6 @@ void MainWindow::OnDumpButton()
         GS::bSectionInfoGood = false;
         GS::bFoundVtables = false;
     }
-    for (unsigned int i = 0; i < GS::VTables.size(); i++) {
-        GS::VTables[i] = NULL;
-    }
-    GS::VTables.resize(0);
-    GS::VTables.shrink_to_fit();
 }
 
 void MainWindow::SearchBarRender()

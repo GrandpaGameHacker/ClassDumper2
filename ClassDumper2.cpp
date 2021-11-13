@@ -3,8 +3,11 @@
 HMODULE ClassDumper2::hSelf;
 HWND ClassDumper2::DXWindow;
 WNDCLASSEX ClassDumper2::WindowClass;
-ImGuiApp ClassDumper2::DXApp;
-
+#ifdef USE_DX12
+ImGuiAppDX12 ClassDumper2::DXApp;
+#else
+ImGuiAppDX11 ClassDumper2::DXApp;
+#endif
 BOOL APIENTRY DllMain(HMODULE hModule,
 	DWORD ul_reason_for_call,
 	LPVOID lpReserved
@@ -62,7 +65,7 @@ DWORD __stdcall ClassDumper2::MainThread(void* lpParam)
 
 void ClassDumper2::CleanExit()
 {
-	DXApp.WaitForLastSubmittedFrame();
+	//DXApp.WaitForLastSubmittedFrame();
 	DXApp.ShutdownBackend();
 	DXApp.CleanupDeviceD3D();
 

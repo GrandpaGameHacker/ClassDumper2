@@ -170,6 +170,8 @@
     <ClInclude Include="ClassDumper2.h" />
     <ClInclude Include="GUI\ClassViewerWindow.h" />
     <ClInclude Include="GUI\ClassInspectorWindow.h" />
+    <ClInclude Include="GUI\Helpers\DX11\imgui_impl_dx11.h" />
+    <ClInclude Include="RenderConfig.h" />
     <ClInclude Include="GUI\InstanceToolWindow.h" />
     <ClInclude Include="RTTI\ClassMetadata.h" />
     <ClInclude Include="Serialization\Serializer.h" />
@@ -192,6 +194,7 @@
     <ClCompile Include="ClassDumper2.cpp" />
     <ClCompile Include="GUI\ClassViewerWindow.cpp" />
     <ClCompile Include="GUI\ClassInspectorWindow.cpp" />
+    <ClCompile Include="GUI\Helpers\DX11\imgui_impl_dx11.cpp" />
     <ClCompile Include="GUI\InstanceToolWindow.cpp" />
     <ClCompile Include="RTTI\ClassMetadata.cpp" />
     <ClCompile Include="Serialization\Serializer.cpp" />

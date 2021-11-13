@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "RenderConfig.h"
 #include "GUI/Helpers/ImGuiApp.h"
 #include "GUI/MainWindow.h"
 #include "GUI/GuiState.h"
@@ -17,6 +18,9 @@ public:
 	static HMODULE hSelf;
 	static HWND DXWindow;
 	static WNDCLASSEX WindowClass;
-
-	static ImGuiApp DXApp;
+#ifdef USE_DX12
+	static ImGuiAppDX12 DXApp;
+#else
+	static ImGuiAppDX11 DXApp;
+#endif
 };

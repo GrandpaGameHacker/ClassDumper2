@@ -21,6 +21,8 @@
     <ClInclude Include="GUI\InstanceToolWindow.h" />
     <ClInclude Include="GUI\ClassInspectorWindow.h" />
     <ClInclude Include="GUI\ClassViewerWindow.h" />
+    <ClInclude Include="GUI\Helpers\DX11\imgui_impl_dx11.h" />
+    <ClInclude Include="RenderConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClassDumper2.cpp" />
@@ -42,5 +44,6 @@
     <ClCompile Include="GUI\InstanceToolWindow.cpp" />
     <ClCompile Include="GUI\ClassInspectorWindow.cpp" />
     <ClCompile Include="GUI\ClassViewerWindow.cpp" />
+    <ClCompile Include="GUI\Helpers\DX11\imgui_impl_dx11.cpp" />
   </ItemGroup>
 </Project>
